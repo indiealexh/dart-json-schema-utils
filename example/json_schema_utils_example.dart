@@ -1,4 +1,4 @@
-import 'package:json_schema_utils/src/json_schema.dart';
+import 'package:json_schema_utils/json_schema_utils.dart';
 
 void main() {
   // Create a basic schema document

@@ -2,4 +2,6 @@
 ///
 library;
 
-export 'src/json_schema.dart';
+export 'src/json_schema.dart' show JsonSchema;
+export 'src/json_schema_document.dart' show JsonSchemaDocument;
+export 'src/json_type.dart' show JsonType;
