@@ -1,3 +1,7 @@
+## 1.0.0-dev.6
+
+- Fix README image link
+
 ## 1.0.0-dev.5
 
 - Update docs and links
