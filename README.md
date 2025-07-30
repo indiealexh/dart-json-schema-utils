@@ -6,6 +6,7 @@ JSONSchema Utils provides tools to help programmatically build JSONSchema Docume
 
  - JSONSchema Support
  - Opinionated JSONSchema Document
+ - Validation of spec compliance while building your schema
 
 ## Getting started
 

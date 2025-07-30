@@ -1,3 +1,7 @@
+## 1.0.0-dev.2
+
+- Added basic Default Value validation to ensure the default value for a schema is valid against the constraints
+
 ## 1.0.0-dev.1
 
 - Initial version
