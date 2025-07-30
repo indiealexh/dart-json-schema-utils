@@ -1,6 +1,6 @@
 name: json_schema_utils
 description: Utilities for building Json Schema Documents
-version: 1.0.0
+version: 1.0.0-dev.1
 repository: https://github.com/indiealexh/dart-json-schema-utils.git
 
 environment:
