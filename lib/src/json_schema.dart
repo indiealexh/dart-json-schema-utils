@@ -261,7 +261,283 @@ abstract class JsonSchema extends JsonSchemaBase {
   dynamic get defaultValue => _defaultValue;
 
   set defaultValue(dynamic value) {
+    _validateDefaultValue(value);
     _defaultValue = value;
+  }
+
+  /// Validates that the default value matches the schema constraints.
+  /// Throws a [FormatException] if the default value is invalid.
+  void _validateDefaultValue(dynamic value) {
+    if (value == null) {
+      return; // null is always valid as a default value
+    }
+
+    // Check against const value first (most restrictive)
+    if (_constValue != null) {
+      bool isEqual = _deepEquals(value, _constValue);
+      if (!isEqual) {
+        throw FormatException('default value must be equal to const value');
+      }
+      return; // If it matches const, no need to check other constraints
+    }
+
+    // Check against enum values
+    if (_enumValues != null) {
+      bool foundMatch = false;
+      for (var enumValue in _enumValues!) {
+        if (_deepEquals(value, enumValue)) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) {
+        throw FormatException('default value must be one of the enum values');
+      }
+      return; // If it's in enum, no need to check other constraints
+    }
+
+    // Check type constraints
+    if (_type != null) {
+      _validateTypeConstraint(value, _type);
+    }
+
+    // Type-specific validations
+    if (value is num) {
+      _validateNumericConstraints(value);
+    } else if (value is String) {
+      _validateStringConstraints(value);
+    } else if (value is List) {
+      _validateArrayConstraints(value);
+    } else if (value is Map) {
+      _validateObjectConstraints(value);
+    }
+  }
+
+  /// Validates that the value matches the type constraint.
+  void _validateTypeConstraint(dynamic value, dynamic typeConstraint) {
+    if (typeConstraint is JsonType) {
+      _validateSingleTypeConstraint(value, typeConstraint);
+    } else if (typeConstraint is List) {
+      bool validForAny = false;
+      for (var type in typeConstraint) {
+        try {
+          _validateSingleTypeConstraint(value, type);
+          validForAny = true;
+          break;
+        } catch (_) {
+          // Continue checking other types
+        }
+      }
+      if (!validForAny) {
+        throw FormatException(
+          'default value does not match any of the specified types',
+        );
+      }
+    }
+  }
+
+  /// Validates that the value matches a single type constraint.
+  void _validateSingleTypeConstraint(dynamic value, JsonType type) {
+    switch (type) {
+      case JsonType.string:
+        if (value is! String) {
+          throw FormatException('default value must be a string');
+        }
+        break;
+      case JsonType.number:
+        if (value is! num) {
+          throw FormatException('default value must be a number');
+        }
+        break;
+      case JsonType.integer:
+        if (value is! int &&
+            (value is! num || value.truncateToDouble() != value)) {
+          throw FormatException('default value must be an integer');
+        }
+        break;
+      case JsonType.object:
+        if (value is! Map) {
+          throw FormatException('default value must be an object');
+        }
+        break;
+      case JsonType.array:
+        if (value is! List) {
+          throw FormatException('default value must be an array');
+        }
+        break;
+      case JsonType.boolean:
+        if (value is! bool) {
+          throw FormatException('default value must be a boolean');
+        }
+        break;
+      case JsonType.nullValue:
+        if (value != null) {
+          throw FormatException('default value must be null');
+        }
+        break;
+    }
+  }
+
+  /// Validates numeric constraints for a number value.
+  void _validateNumericConstraints(num value) {
+    // Check minimum before maximum (logical order)
+    if (_minimum != null) {
+      if (value < _minimum!) {
+        throw FormatException(
+          'default value must be greater than or equal to minimum ($minimum)',
+        );
+      }
+    }
+
+    if (_exclusiveMinimum != null) {
+      if (value <= _exclusiveMinimum!) {
+        throw FormatException(
+          'default value must be greater than exclusive minimum ($exclusiveMinimum)',
+        );
+      }
+    }
+
+    if (_maximum != null) {
+      if (value > _maximum!) {
+        throw FormatException(
+          'default value must be less than or equal to maximum ($maximum)',
+        );
+      }
+    }
+
+    if (_exclusiveMaximum != null) {
+      if (value >= _exclusiveMaximum!) {
+        throw FormatException(
+          'default value must be less than exclusive maximum ($exclusiveMaximum)',
+        );
+      }
+    }
+
+    if (_multipleOf != null) {
+      // Check if value is a multiple of multipleOf
+      if ((value / _multipleOf!).truncateToDouble() != value / _multipleOf!) {
+        throw FormatException(
+          'default value must be a multiple of $multipleOf',
+        );
+      }
+    }
+  }
+
+  /// Validates string constraints for a string value.
+  void _validateStringConstraints(String value) {
+    // Check minLength before maxLength (logical order)
+    if (_minLength != null) {
+      if (value.length < _minLength!) {
+        throw FormatException(
+          'default value length must be at least $minLength',
+        );
+      }
+    }
+
+    if (_maxLength != null) {
+      if (value.length > _maxLength!) {
+        throw FormatException(
+          'default value length must not exceed $maxLength',
+        );
+      }
+    }
+
+    if (_pattern != null) {
+      RegExp regex = RegExp(_pattern!);
+      if (!regex.hasMatch(value)) {
+        throw FormatException(
+          'default value must match the pattern: $_pattern',
+        );
+      }
+    }
+  }
+
+  /// Validates array constraints for a list value.
+  void _validateArrayConstraints(List value) {
+    // Check minItems before maxItems (logical order)
+    if (_minItems != null) {
+      if (value.length < _minItems!) {
+        throw FormatException(
+          'default value array must have at least $_minItems items',
+        );
+      }
+    }
+
+    if (_maxItems != null) {
+      if (value.length > _maxItems!) {
+        throw FormatException(
+          'default value array must not have more than $_maxItems items',
+        );
+      }
+    }
+
+    if (_uniqueItems == true) {
+      // Check for duplicate items
+      Set uniqueItems = {};
+      for (var item in value) {
+        String serialized = json.encode(item);
+        if (uniqueItems.contains(serialized)) {
+          throw FormatException('default value array must have unique items');
+        }
+        uniqueItems.add(serialized);
+      }
+    }
+
+    // TODO: Add validation for items, additionalItems, and contains if needed
+  }
+
+  /// Validates object constraints for a map value.
+  void _validateObjectConstraints(Map value) {
+    // Check minProperties before maxProperties (logical order)
+    if (_minProperties != null) {
+      if (value.length < _minProperties!) {
+        throw FormatException(
+          'default value object must have at least $_minProperties properties',
+        );
+      }
+    }
+
+    if (_maxProperties != null) {
+      if (value.length > _maxProperties!) {
+        throw FormatException(
+          'default value object must not have more than $_maxProperties properties',
+        );
+      }
+    }
+
+    if (_required != null) {
+      for (var propName in _required!) {
+        if (!value.containsKey(propName)) {
+          throw FormatException(
+            'default value object must have required property: $propName',
+          );
+        }
+      }
+    }
+
+    // TODO: Add validation for properties, patternProperties, additionalProperties if needed
+  }
+
+  /// Deep equality check for JSON values.
+  bool _deepEquals(dynamic a, dynamic b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+
+    if (a is List && b is List) {
+      if (a.length != b.length) return false;
+      for (int i = 0; i < a.length; i++) {
+        if (!_deepEquals(a[i], b[i])) return false;
+      }
+      return true;
+    } else if (a is Map && b is Map) {
+      if (a.length != b.length) return false;
+      for (var key in a.keys) {
+        if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) return false;
+      }
+      return true;
+    } else {
+      return a == b;
+    }
   }
 
   @override
