@@ -1,6 +1,6 @@
 # json_schema_utils
 
-![JSONSchema Utils Logo]('/docs/assets/dart-json-schema-utils-header.webp')
+![JSONSchema Utils Logo](https://raw.githubusercontent.com/indiealexh/dart-json-schema-utils/refs/heads/main/docs/assets/dart-json-schema-utils-header.webp)
 
 JSONSchema Utils provides tools to help programmatically build JSONSchema Documents
 
