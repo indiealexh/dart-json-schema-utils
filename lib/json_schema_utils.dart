@@ -1,8 +1,5 @@
-/// Support for doing something awesome.
+/// JSONSchema Utils
 ///
-/// More dartdocs go here.
 library;
 
-export 'src/json_schema_utils_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/json_schema.dart';
