@@ -5,7 +5,7 @@ repository: https://github.com/indiealexh/dart-json-schema-utils.git
 homepage: https://indiealexh.com/projects
 topics:
   - json
-  - json schema
+  - json-schema
   - schema
 environment:
   sdk: ^3.8.1
