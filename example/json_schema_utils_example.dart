@@ -11,15 +11,16 @@ void main() {
   try {
     // Test basic properties
     print('Testing basic properties...');
-    schema.id = "https://example.com/schemas/vehicle";
-    schema.comment = "This is a comment";
-    schema.defaultValue = {"type": "sedan"};
-    schema.examples = [
-      {"type": "sedan"},
-      {"type": "suv"},
-    ];
-    schema.readOnly = true;
-    schema.writeOnly = false;
+    schema
+      ..id = "https://example.com/schemas/vehicle"
+      ..comment = "This is a comment"
+      ..defaultValue = {"type": "sedan"}
+      ..examples = [
+        {"type": "sedan"},
+        {"type": "suv"},
+      ]
+      ..readOnly = true
+      ..writeOnly = false;
 
     // Test type property
     print('Testing type property...');
