@@ -1,5 +1,4 @@
 import 'package:json_schema_utils/json_schema_utils.dart';
-import 'package:json_schema_utils/src/json_schema.dart';
 import 'package:test/test.dart';
 
 class TestJsonSchema extends JsonSchema {}

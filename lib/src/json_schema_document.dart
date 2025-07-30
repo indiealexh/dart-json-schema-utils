@@ -19,7 +19,7 @@ class JsonSchemaDocument extends JsonSchema with JsonSchemaIdRequired {
     if (id.isEmpty) {
       throw "id is empty";
     }
-    var _id = Uri.parse(id);
+    var idUri = Uri.parse(id);
     if (title.isEmpty) {
       throw "Title is empty";
     }
@@ -27,7 +27,7 @@ class JsonSchemaDocument extends JsonSchema with JsonSchemaIdRequired {
       throw "Description is empty";
     }
 
-    return JsonSchemaDocument._internal(_id.toString(), title, description);
+    return JsonSchemaDocument._internal(idUri.toString(), title, description);
   }
 
   JsonSchemaDocument._internal(this.id, this.title, this.description);
