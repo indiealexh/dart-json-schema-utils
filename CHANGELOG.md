@@ -1,12 +1,8 @@
 ## 1.0.0-dev.5
 
+- Update docs and links
 
-
-## 1.0.0-dev.4
-
-
-
-## 1.0.0-dev.3
+## 1.0.0-dev.3 & 1.0.0-dev.4
 
 - Improve library organization
 
