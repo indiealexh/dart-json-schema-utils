@@ -1,3 +1,7 @@
+## 1.0.0-dev.3
+
+- Improve library organization
+
 ## 1.0.0-dev.2
 
 - Added basic Default Value validation to ensure the default value for a schema is valid against the constraints
