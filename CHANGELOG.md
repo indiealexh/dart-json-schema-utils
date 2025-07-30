@@ -1,3 +1,5 @@
-## 1.0.0
+## 1.0.0-dev.1
 
-- Initial version.
+- Initial version
+- Add basic JSONSchema support
+- Add opinionated JSONSchema Document class / builder
