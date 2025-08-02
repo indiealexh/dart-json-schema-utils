@@ -336,7 +336,7 @@ class ValidationError {
   factory ValidationError.minPropertiesViolation({
     required String path,
     required int expected,
-    required Map<String, dynamic> actual,
+    required dynamic actual,
     required JsonSchemaBase schema,
   }) {
     return ValidationError(
@@ -354,7 +354,7 @@ class ValidationError {
   factory ValidationError.maxPropertiesViolation({
     required String path,
     required int expected,
-    required Map<String, dynamic> actual,
+    required dynamic actual,
     required JsonSchemaBase schema,
   }) {
     return ValidationError(
@@ -399,6 +399,86 @@ class ValidationError {
       expected: expected,
       actual: actual,
       message: message,
+      schema: schema,
+    );
+  }
+
+  /// Creates a [ValidationError] for an allOf validation failure.
+  factory ValidationError.allOfViolation({
+    required String path,
+    required String details,
+    required JsonSchemaBase schema,
+  }) {
+    return ValidationError(
+      path: path,
+      keyword: 'allOf',
+      expected: 'value to match all schemas',
+      actual: 'value does not match all schemas',
+      message: details,
+      schema: schema,
+    );
+  }
+
+  /// Creates a [ValidationError] for an anyOf validation failure.
+  factory ValidationError.anyOfViolation({
+    required String path,
+    required String details,
+    required JsonSchemaBase schema,
+  }) {
+    return ValidationError(
+      path: path,
+      keyword: 'anyOf',
+      expected: 'value to match at least one schema',
+      actual: 'value does not match any schema',
+      message: details,
+      schema: schema,
+    );
+  }
+
+  /// Creates a [ValidationError] for a oneOf validation failure.
+  factory ValidationError.oneOfViolation({
+    required String path,
+    required String details,
+    required JsonSchemaBase schema,
+  }) {
+    return ValidationError(
+      path: path,
+      keyword: 'oneOf',
+      expected: 'value to match exactly one schema',
+      actual: 'value does not match exactly one schema',
+      message: details,
+      schema: schema,
+    );
+  }
+
+  /// Creates a [ValidationError] for a not validation failure.
+  factory ValidationError.notViolation({
+    required String path,
+    required String details,
+    required JsonSchemaBase schema,
+  }) {
+    return ValidationError(
+      path: path,
+      keyword: 'not',
+      expected: 'value to not match schema',
+      actual: 'value matches schema',
+      message: details,
+      schema: schema,
+    );
+  }
+
+  /// Creates a [ValidationError] for a conditional validation failure.
+  factory ValidationError.conditionalViolation({
+    required String path,
+    required String details,
+    required JsonSchemaBase schema,
+  }) {
+    return ValidationError(
+      path: path,
+      keyword: 'if-then-else',
+      expected: 'value to match conditional schema',
+      actual: 'value does not match conditional schema',
+      message: details,
       schema: schema,
     );
   }

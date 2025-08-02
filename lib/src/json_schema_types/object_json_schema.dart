@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../json_schema.dart';
 import '../json_schema_base.dart';
 import '../json_type.dart';
+import '../cross_type_validator.dart';
 
 /// A specialized JSON Schema class that only supports the Object type.
 ///
@@ -259,7 +260,7 @@ class ObjectJsonSchema extends JsonSchema {
             }
           } else if (dependency is JsonSchemaBase) {
             // Schema dependency
-            if (!_isValidAgainstSchema(value, dependency)) {
+            if (!CrossTypeValidator.validate(value, dependency, "").isValid) {
               throw FormatException(
                 'Object with property "$propName" does not match its dependency schema',
               );
@@ -327,211 +328,19 @@ class ObjectJsonSchema extends JsonSchema {
 
   /// Helper method to check if a property value is valid against a schema
   bool _isValidPropertyValue(dynamic value, JsonSchemaBase schema) {
-    return _isValidAgainstSchema(value, schema);
+    return CrossTypeValidator.validate(value, schema, "").isValid;
   }
 
-  /// Generic method to check if a value is valid against a schema
-  bool _isValidAgainstSchema(dynamic value, JsonSchemaBase schema) {
-    // If value is null, it's valid unless the schema explicitly requires a non-null value
-    if (value == null) {
-      // If schema type is explicitly set to null, then null is valid
-      if (schema.type == JsonType.nullValue) {
-        return true;
-      }
-
-      // If schema type is a list that includes null, then null is valid
-      if (schema.type is List && schema.type.contains(JsonType.nullValue)) {
-        return true;
-      }
-
-      // If schema has no type constraint, null is valid
-      if (schema.type == null) {
-        return true;
-      }
-
-      // Otherwise, null is not valid
-      return false;
-    }
-
-    // Check type constraint
-    if (schema.type != null) {
-      if (schema.type is JsonType) {
-        if (!_matchesType(value, schema.type)) {
-          return false;
-        }
-      } else if (schema.type is List) {
-        bool matchesAnyType = false;
-        for (var type in schema.type) {
-          if (_matchesType(value, type)) {
-            matchesAnyType = true;
-            break;
-          }
-        }
-        if (!matchesAnyType) {
-          return false;
-        }
-      }
-    }
-
-    // Check const constraint
-    if (schema.constValue != null) {
-      if (!_deepEquals(value, schema.constValue)) {
-        return false;
-      }
-      return true; // If it matches const, no need to check other constraints
-    }
-
-    // Check enum constraint
-    if (schema.enumValues != null) {
-      bool foundMatch = false;
-      for (var enumValue in schema.enumValues!) {
-        if (_deepEquals(value, enumValue)) {
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch) {
-        return false;
-      }
-      return true; // If it's in enum, no need to check other constraints
-    }
-
-    // Type-specific validations
-    if (value is String) {
-      // String validations
-      if (schema.minLength != null && value.length < schema.minLength!) {
-        return false;
-      }
-
-      if (schema.maxLength != null && value.length > schema.maxLength!) {
-        return false;
-      }
-
-      if (schema.pattern != null) {
-        RegExp regex = RegExp(schema.pattern!);
-        if (!regex.hasMatch(value)) {
-          return false;
-        }
-      }
-    } else if (value is num) {
-      // Number validations
-      if (schema.minimum != null && value < schema.minimum!) {
-        return false;
-      }
-
-      if (schema.exclusiveMinimum != null &&
-          value <= schema.exclusiveMinimum!) {
-        return false;
-      }
-
-      if (schema.maximum != null && value > schema.maximum!) {
-        return false;
-      }
-
-      if (schema.exclusiveMaximum != null &&
-          value >= schema.exclusiveMaximum!) {
-        return false;
-      }
-
-      if (schema.multipleOf != null) {
-        if ((value / schema.multipleOf!).truncateToDouble() !=
-            value / schema.multipleOf!) {
-          return false;
-        }
-      }
-    } else if (value is List) {
-      // Array validations
-      if (schema.minItems != null && value.length < schema.minItems!) {
-        return false;
-      }
-
-      if (schema.maxItems != null && value.length > schema.maxItems!) {
-        return false;
-      }
-
-      if (schema.uniqueItems == true) {
-        Set uniqueItems = {};
-        for (var item in value) {
-          String serialized = json.encode(item);
-          if (uniqueItems.contains(serialized)) {
-            return false;
-          }
-          uniqueItems.add(serialized);
-        }
-      }
-
-      // TODO: Add validation for items, additionalItems, and contains if needed
-    } else if (value is Map) {
-      // Object validations
-      if (schema.minProperties != null &&
-          value.length < schema.minProperties!) {
-        return false;
-      }
-
-      if (schema.maxProperties != null &&
-          value.length > schema.maxProperties!) {
-        return false;
-      }
-
-      if (schema.required != null) {
-        for (var propName in schema.required!) {
-          if (!value.containsKey(propName)) {
-            return false;
-          }
-        }
-      }
-
-      // TODO: Add validation for properties, patternProperties, additionalProperties if needed
-    }
-
-    return true;
-  }
-
-  /// Helper method to check if a value matches a specific JSON type
-  bool _matchesType(dynamic value, JsonType type) {
-    switch (type) {
-      case JsonType.string:
-        return value is String;
-      case JsonType.number:
-        return value is num;
-      case JsonType.integer:
-        return value is int ||
-            (value is num && value.truncateToDouble() == value);
-      case JsonType.object:
-        return value is Map;
-      case JsonType.array:
-        return value is List;
-      case JsonType.boolean:
-        return value is bool;
-      case JsonType.nullValue:
-        return value == null;
-    }
-  }
-
-  /// Deep equality check for objects
+  /// Deep equality check for objects using JSON serialization
   bool _deepEquals(dynamic a, dynamic b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
 
-    if (a is Map && b is Map) {
-      if (a.length != b.length) return false;
-
-      for (var key in a.keys) {
-        if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) {
-          return false;
-        }
-      }
-
-      return true;
-    } else if (a is List && b is List) {
-      if (a.length != b.length) return false;
-
-      for (int i = 0; i < a.length; i++) {
-        if (!_deepEquals(a[i], b[i])) return false;
-      }
-
-      return true;
-    } else {
+    try {
+      // Convert both values to JSON strings and compare
+      return json.encode(a) == json.encode(b);
+    } catch (e) {
+      // If serialization fails, fall back to direct equality
       return a == b;
     }
   }
