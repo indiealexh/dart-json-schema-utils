@@ -12,6 +12,10 @@ void main() {
   // Part 3: BooleanJsonSchema example
   print('\n\n=== BooleanJsonSchema Example ===');
   booleanJsonSchemaExample();
+
+  // Part 4: NumberJsonSchema example
+  print('\n\n=== NumberJsonSchema Example ===');
+  numberJsonSchemaExample();
 }
 
 void generalJsonSchemaExample() {
@@ -316,4 +320,122 @@ void booleanJsonSchemaExample() {
   print(
     '  false: ${readOnlySchema.validateBoolean(false) ? 'Valid' : 'Invalid'}',
   );
+}
+
+void numberJsonSchemaExample() {
+  print('Creating a NumberJsonSchema for price validation...');
+
+  // Create a NumberJsonSchema for price validation
+  var priceSchema = NumberJsonSchema()
+    ..title = "Price Schema"
+    ..description = "A schema for validating price values"
+    ..minimum = 0
+    ..multipleOf =
+        0.01 // Ensure prices have at most 2 decimal places
+    ..defaultValue = 9.99;
+
+  print('Schema created: ${priceSchema.toJson()}');
+
+  // Test valid numeric values
+  print('\nValidating valid numeric values:');
+  var validNumbers = [0, 9.99, 10.50, 100, 123.45];
+
+  for (var value in validNumbers) {
+    bool isValid = priceSchema.validateNumber(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Test invalid numeric values
+  print('\nValidating invalid numeric values:');
+  var invalidValues = [
+    -1, // Below minimum
+    9.999, // Not a multiple of 0.01
+    'price', // String, not number
+    true, // Boolean, not number
+    [10, 20], // Array, not number
+    {'price': 10}, // Object, not number
+  ];
+
+  for (var value in invalidValues) {
+    bool isValid = priceSchema.validateNumber(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to string...');
+    priceSchema.type = JsonType.string;
+    print('  Failed: Should not allow setting type to string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to a valid number...');
+    priceSchema.defaultValue = 19.99;
+    print('  Success: defaultValue set to ${priceSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a string...');
+    priceSchema.defaultValue = 'price';
+    print('  Failed: Should not allow setting defaultValue to a string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Create a schema with range constraints
+  print('\nCreating a NumberJsonSchema for age validation...');
+  var ageSchema = NumberJsonSchema()
+    ..title = "Age Schema"
+    ..description = "A schema for validating age values"
+    ..minimum = 0
+    ..maximum = 120
+    ..multipleOf =
+        1 // Integer values only
+    ..defaultValue = 18;
+
+  print('Schema created: ${ageSchema.toJson()}');
+
+  // Test range constraints
+  print('\nTesting range constraints:');
+  var ageValues = [0, 18, 65, 120, -1, 121, 18.5];
+  for (var age in ageValues) {
+    bool isValid = ageSchema.validateNumber(age);
+    print('  $age: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Create a schema with enum constraint
+  print('\nCreating a NumberJsonSchema with enum constraint...');
+  var ratingSchema = NumberJsonSchema()
+    ..title = "Rating Schema"
+    ..description = "A schema for validating rating values (1-5 stars)"
+    ..enumValues = [1, 2, 3, 4, 5]
+    ..defaultValue = 5;
+
+  print('Schema created: ${ratingSchema.toJson()}');
+
+  // Test enum constraint
+  print('\nTesting enum constraint:');
+  var ratingValues = [1, 3, 5, 0, 2.5, 6];
+  for (var rating in ratingValues) {
+    bool isValid = ratingSchema.validateNumber(rating);
+    print('  $rating: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate const constraint
+  print('\nDemonstrating const constraint:');
+  var piSchema = NumberJsonSchema()
+    ..title = "Pi Schema"
+    ..description = "A schema for the mathematical constant pi"
+    ..constValue = 3.14159;
+
+  print('Schema created: ${piSchema.toJson()}');
+
+  var piValues = [3.14159, 3.14, 3];
+  for (var value in piValues) {
+    bool isValid = piSchema.validateNumber(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
 }
