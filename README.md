@@ -55,6 +55,37 @@ class Example {
       } catch (e) {
          print('Error: $e');
       }
+
+      try {
+
+         // Create a StringJsonSchema for email validation
+         var emailSchema = StringJsonSchema()
+            ..title = "Email Schema"
+            ..description = "A schema for validating email addresses"
+            ..format = "email"
+            ..minLength = 5
+            ..maxLength = 100
+            ..pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+         var schema = JsonSchemaDocument(
+            "https://indiealexh.dev/schema/email-list",
+            "Email List Schema",
+            "A Schema to describe a list of emails",
+         );
+         schema
+            ..comment = "This is a comment"
+            ..defaultValue = []
+            ..examples = [
+               ["example@example.com"],
+               ["example@example.com","example2@example.com"]
+            ]
+            ..type = JsonType.array
+            ..contains = emailSchema
+            ..readOnly = true
+            ..writeOnly = false;
+      } catch (e) {
+         print('Error: $e');
+      }
+
    }
 }
 ```

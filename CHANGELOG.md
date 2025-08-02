@@ -1,6 +1,7 @@
 ## 1.0.0-dev.12
 
 - Restructure JSON schema types to improve structure
+- Update Example to show new Schema Type classes
 
 ## 1.0.0-dev.11
 
