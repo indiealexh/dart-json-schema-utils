@@ -33,6 +33,7 @@ class JsonSchemaDocument extends JsonSchema with JsonSchemaIdRequired {
   JsonSchemaDocument._internal(this.id, this.title, this.description);
 }
 
+/// Forces non-nullable types for fields required for a traceable, sharable and well documented schema
 mixin JsonSchemaIdRequired {
   String get schema;
 

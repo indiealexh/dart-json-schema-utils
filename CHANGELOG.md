@@ -1,3 +1,8 @@
+## 1.0.0-dev.10
+
+- Add a String type only JSON Schema class
+
+
 ## 1.0.0-dev.9
 
 - Fix README image link after docs to doc change

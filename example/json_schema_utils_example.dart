@@ -1,6 +1,16 @@
 import 'package:json_schema_utils/json_schema_utils.dart';
 
 void main() {
+  // Part 1: General JsonSchema example
+  print('=== General JsonSchema Example ===');
+  generalJsonSchemaExample();
+
+  // Part 2: StringJsonSchema example
+  print('\n\n=== StringJsonSchema Example ===');
+  stringJsonSchemaExample();
+}
+
+void generalJsonSchemaExample() {
   // Create a basic schema document
   var schema = JsonSchemaDocument(
     "https://indiealexh.dev/schema/vehicle",
@@ -114,5 +124,97 @@ void main() {
     print('Failed: allOf should not accept empty array');
   } catch (e) {
     print('Success: allOf validation works - $e');
+  }
+}
+
+void stringJsonSchemaExample() {
+  print('Creating a StringJsonSchema for email validation...');
+
+  // Create a StringJsonSchema for email validation
+  var emailSchema = StringJsonSchema()
+    ..title = "Email Schema"
+    ..description = "A schema for validating email addresses"
+    ..format = "email"
+    ..minLength = 5
+    ..maxLength = 100
+    ..pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+  print('Schema created: ${emailSchema.toJson()}');
+
+  // Test valid emails
+  print('\nValidating valid email addresses:');
+  var validEmails = [
+    'user@example.com',
+    'john.doe@company.co.uk',
+    'info@test-site.org',
+  ];
+
+  for (var email in validEmails) {
+    bool isValid = emailSchema.validateString(email);
+    print('  $email: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Test invalid emails
+  print('\nValidating invalid email addresses:');
+  var invalidEmails = [
+    'not-an-email',
+    'missing@domain',
+    '@missing-username.com',
+    'too.short@a.b', // Too short
+    'a' * 101 + '@example.com', // Too long
+  ];
+
+  for (var email in invalidEmails) {
+    bool isValid = emailSchema.validateString(email);
+    print('  $email: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to number...');
+    emailSchema.type = JsonType.number;
+    print('  Failed: Should not allow setting type to number');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to a valid string...');
+    emailSchema.defaultValue = 'default@example.com';
+    print('  Success: defaultValue set to ${emailSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a number...');
+    emailSchema.defaultValue = 123;
+    print('  Failed: Should not allow setting defaultValue to a number');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Create a password schema
+  print('\nCreating a StringJsonSchema for password validation...');
+  var passwordSchema = StringJsonSchema()
+    ..title = "Password Schema"
+    ..description = "A schema for validating passwords"
+    ..minLength = 8
+    ..maxLength = 64
+    ..pattern =
+        r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$";
+
+  print('Schema created: ${passwordSchema.toJson()}');
+
+  // Test valid and invalid passwords
+  print('\nValidating passwords:');
+  var passwords = [
+    'Abcd1234!', // Valid
+    'weakpassword', // Invalid - no uppercase, digits or special chars
+    'Short1!', // Invalid - too short
+  ];
+
+  for (var password in passwords) {
+    bool isValid = passwordSchema.validateString(password);
+    print('  "${password}": ${isValid ? 'Valid' : 'Invalid'}');
   }
 }
