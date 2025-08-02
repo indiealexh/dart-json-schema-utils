@@ -206,6 +206,125 @@ void main() {
         ); // Invalid month
       });
 
+      test('date format', () {
+        schema.format = 'date';
+
+        // Valid
+        expect(schema.validateString('2025-08-02'), isTrue);
+        expect(schema.validateString('2020-02-29'), isTrue); // Leap year
+
+        // Invalid
+        expect(schema.validateString('not a date'), isFalse);
+        expect(schema.validateString('2025-13-02'), isFalse); // Invalid month
+        expect(schema.validateString('2025/08/02'), isFalse); // Wrong format
+        expect(schema.validateString('2021-02-29'), isFalse); // Not a leap year
+      });
+
+      test('time format', () {
+        schema.format = 'time';
+
+        // Valid
+        expect(schema.validateString('11:10:00Z'), isTrue);
+        expect(schema.validateString('23:59:59Z'), isTrue);
+        expect(schema.validateString('11:10:00.123Z'), isTrue);
+        expect(schema.validateString('11:10:00+01:00'), isTrue);
+
+        // Invalid
+        expect(schema.validateString('not a time'), isFalse);
+        expect(schema.validateString('24:00:00Z'), isFalse); // Invalid hour
+        expect(schema.validateString('11:60:00Z'), isFalse); // Invalid minute
+        expect(schema.validateString('11:10'), isFalse); // Missing seconds
+      });
+
+      test('duration format', () {
+        schema.format = 'duration';
+
+        // Valid
+        expect(schema.validateString('P1Y'), isTrue);
+        expect(schema.validateString('P1M'), isTrue);
+        expect(schema.validateString('P1D'), isTrue);
+        expect(schema.validateString('PT1H'), isTrue);
+        expect(schema.validateString('PT1M'), isTrue);
+        expect(schema.validateString('PT1S'), isTrue);
+        expect(schema.validateString('P1Y2M3DT4H5M6S'), isTrue);
+        expect(schema.validateString('P1W'), isTrue);
+
+        // Invalid
+        expect(schema.validateString('not a duration'), isFalse);
+        expect(schema.validateString('P'), isFalse); // Empty duration
+        expect(schema.validateString('PT'), isFalse); // Empty time duration
+        expect(schema.validateString('1Y2M'), isFalse); // Missing P
+      });
+
+      test('uuid format', () {
+        schema.format = 'uuid';
+
+        // Valid
+        expect(
+          schema.validateString('123e4567-e89b-12d3-a456-426614174000'),
+          isTrue,
+        );
+        expect(
+          schema.validateString('123E4567-E89B-12D3-A456-426614174000'),
+          isTrue,
+        ); // Case insensitive
+
+        // Invalid
+        expect(schema.validateString('not a uuid'), isFalse);
+        expect(
+          schema.validateString('123e4567-e89b-12d3-a456'),
+          isFalse,
+        ); // Too short
+        expect(
+          schema.validateString('123e4567-e89b-62d3-a456-426614174000'),
+          isFalse,
+        ); // Invalid version
+        expect(
+          schema.validateString('123e4567-e89b-12d3-e456-426614174000'),
+          isFalse,
+        ); // Invalid variant
+      });
+
+      test('json-pointer format', () {
+        schema.format = 'json-pointer';
+
+        // Valid
+        expect(schema.validateString(''), isTrue);
+        expect(schema.validateString('/foo'), isTrue);
+        expect(schema.validateString('/foo/0'), isTrue);
+        expect(schema.validateString('/foo/bar'), isTrue);
+        expect(schema.validateString('/foo/bar/0'), isTrue);
+        expect(schema.validateString('/~0/~1'), isTrue); // Escaped ~ and /
+
+        // Invalid
+        expect(schema.validateString('not a json-pointer'), isFalse);
+        expect(schema.validateString('foo'), isFalse); // Missing leading /
+        expect(schema.validateString('/foo/'), isFalse); // Trailing /
+        expect(
+          schema.validateString('/foo//bar'),
+          isFalse,
+        ); // Empty reference token
+      });
+
+      test('regex format', () {
+        schema.format = 'regex';
+
+        // Valid
+        expect(schema.validateString('^[a-z]+\$'), isTrue);
+        expect(schema.validateString('\\d{3}-\\d{2}-\\d{4}'), isTrue);
+        expect(
+          schema.validateString(
+            '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+          ),
+          isTrue,
+        );
+
+        // Invalid
+        expect(schema.validateString('[unclosed bracket'), isFalse);
+        expect(schema.validateString('(unclosed parenthesis'), isFalse);
+        expect(schema.validateString('**invalid quantifier'), isFalse);
+      });
+
       test('email format', () {
         schema.format = 'email';
 

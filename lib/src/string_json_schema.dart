@@ -119,7 +119,7 @@ class StringJsonSchema extends JsonSchema {
   /// This method checks if the string conforms to the specified format
   /// as defined in JSON Schema specification.
   ///
-  /// Supported formats: date-time, email, hostname, ipv4, ipv6, uri, uri-reference
+  /// Supported formats: date-time, date, time, duration, email, hostname, ipv4, ipv6, uri, uri-reference, uuid, json-pointer, regex
   void validateFormat(String value, String format) {
     switch (format) {
       case 'date-time':
@@ -148,6 +148,125 @@ class StringJsonSchema extends JsonSchema {
           }
         } catch (e) {
           throw FormatException('Invalid date-time format: ${e.toString()}');
+        }
+        break;
+
+      case 'date':
+        try {
+          // Validate format with regex to ensure it follows RFC 3339 full-date
+          final dateRegex = RegExp(
+            r'^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$',
+          );
+          if (!dateRegex.hasMatch(value)) {
+            throw FormatException('Date format does not conform to RFC 3339');
+          }
+
+          // Parse to validate the date is valid (e.g., not 2023-02-31)
+          final parts = value.split('-');
+          final year = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final day = int.parse(parts[2]);
+
+          // Create a DateTime to validate the date
+          final date = DateTime(year, month, day);
+
+          // Check if the date is valid by comparing the original components
+          if (date.year != year || date.month != month || date.day != day) {
+            throw FormatException('Invalid date values');
+          }
+        } catch (e) {
+          throw FormatException('Invalid date format: ${e.toString()}');
+        }
+        break;
+
+      case 'time':
+        try {
+          // Validate format with regex to ensure it follows RFC 3339 full-time
+          final timeRegex = RegExp(
+            r'^([01]\d|2[0-3]):([0-5]\d):([0-5]\d|60)(\.\d+)?(Z|([+-])([01]\d|2[0-3]):([0-5]\d))$',
+          );
+          if (!timeRegex.hasMatch(value)) {
+            throw FormatException('Time format does not conform to RFC 3339');
+          }
+        } catch (e) {
+          throw FormatException('Invalid time format: ${e.toString()}');
+        }
+        break;
+
+      case 'duration':
+        try {
+          // ISO 8601 duration format
+          // P[n]Y[n]M[n]DT[n]H[n]M[n]S or P[n]W
+          final durationRegex = RegExp(
+            r'^P(?!$)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$|^P\d+W$',
+          );
+          if (!durationRegex.hasMatch(value)) {
+            throw FormatException('Invalid duration format');
+          }
+        } catch (e) {
+          throw FormatException('Invalid duration format: ${e.toString()}');
+        }
+        break;
+
+      case 'uuid':
+        try {
+          // UUID format according to RFC 4122
+          final uuidRegex = RegExp(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+            caseSensitive: false,
+          );
+          if (!uuidRegex.hasMatch(value)) {
+            throw FormatException('Invalid UUID format');
+          }
+        } catch (e) {
+          throw FormatException('Invalid UUID format: ${e.toString()}');
+        }
+        break;
+
+      case 'json-pointer':
+        try {
+          // JSON Pointer format according to RFC 6901
+          // Either empty string or starts with / followed by tokens
+          // Empty reference tokens (like //) are not allowed
+          if (value.isEmpty) {
+            // Empty string is a valid JSON Pointer
+            break;
+          }
+
+          if (!value.startsWith('/')) {
+            throw FormatException('JSON Pointer must start with / or be empty');
+          }
+
+          if (value.endsWith('/')) {
+            throw FormatException('JSON Pointer must not end with /');
+          }
+
+          if (value.contains('//')) {
+            throw FormatException(
+              'JSON Pointer must not contain empty reference tokens',
+            );
+          }
+
+          // Check for proper escaping of ~ and /
+          final parts = value.split('/').skip(1); // Skip the first empty part
+          for (final part in parts) {
+            // Check for invalid escape sequences
+            if (part.contains('~') &&
+                !(part.contains('~0') || part.contains('~1'))) {
+              throw FormatException('Invalid escape sequence in JSON Pointer');
+            }
+          }
+        } catch (e) {
+          throw FormatException('Invalid JSON Pointer format: ${e.toString()}');
+        }
+        break;
+
+      case 'regex':
+        try {
+          // Try to compile the regex to validate it
+          RegExp(value);
+        } catch (e) {
+          throw FormatException('Invalid regular expression: ${e.toString()}');
         }
         break;
 
