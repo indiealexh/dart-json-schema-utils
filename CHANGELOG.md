@@ -1,3 +1,8 @@
+## 1.0.0-dev.9
+
+- Fix README image link after docs to doc change
+- Clarify the reason for Opinionated JSON Schema Document class
+
 ## 1.0.0-dev.8
 
 - Move Docs directory to Doc to comply with Dart best practices

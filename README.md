@@ -1,6 +1,6 @@
 # json_schema_utils
 
-![JSONSchema Utils Logo](https://raw.githubusercontent.com/indiealexh/dart-json-schema-utils/refs/heads/main/docs/assets/dart-json-schema-utils-header.webp)
+![JSONSchema Utils Logo](https://raw.githubusercontent.com/indiealexh/dart-json-schema-utils/refs/heads/main/doc/assets/dart-json-schema-utils-header.webp)
 
 JSONSchema Utils provides tools to help programmatically build JSONSchema Documents
 
@@ -9,7 +9,7 @@ Compatible with all Dart environments, including Flutter (Web, Mobile and Deskto
 ## Features
 
  - JSONSchema Support
- - Opinionated JSONSchema Document
+ - Opinionated JSONSchema Document for compatibility with external $ref and schema registries
    - Required $schema (Currently only supports [JSON Schema Draft 7](https://json-schema.org/draft-07))
    - Required $id
    - Required title
