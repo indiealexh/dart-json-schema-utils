@@ -1,3 +1,8 @@
+## 1.0.0-dev.11
+
+- Improve validation by providing more detailed reasons and causes
+- Make some validation check all conditions before returning with multiple error messages
+
 ## 1.0.0-dev.10
 
 - Add a String type only JSON Schema class
