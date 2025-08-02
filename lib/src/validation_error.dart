@@ -1,5 +1,4 @@
 import 'json_schema_base.dart';
-import 'json_type.dart';
 
 /// Represents a validation error that occurred during JSON Schema validation.
 ///

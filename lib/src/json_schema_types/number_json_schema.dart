@@ -1,6 +1,6 @@
-import 'json_schema.dart';
-import 'json_type.dart';
-import 'validation_error.dart';
+import '../json_schema.dart';
+import '../json_type.dart';
+import '../validation_error.dart';
 
 /// A specialized JSON Schema class that only supports the Number type.
 ///

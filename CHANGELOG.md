@@ -1,3 +1,7 @@
+## 1.0.0-dev.12
+
+- Restructure JSON schema types to improve structure
+
 ## 1.0.0-dev.11
 
 - Improve validation by providing more detailed reasons and causes

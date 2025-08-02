@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'json_schema.dart';
-import 'json_schema_base.dart';
-import 'json_type.dart';
+import '../json_schema.dart';
+import '../json_schema_base.dart';
+import '../json_type.dart';
 
 /// A specialized JSON Schema class that only supports the Object type.
 ///
