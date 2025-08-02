@@ -88,7 +88,6 @@ class CrossTypeValidator {
   ) {
     List<ValidationError> errors = [];
     int validCount = 0;
-    int validIndex = -1;
 
     for (int i = 0; i < schemas.length; i++) {
       final schema = schemas[i];
@@ -96,7 +95,6 @@ class CrossTypeValidator {
 
       if (result.isValid) {
         validCount++;
-        validIndex = i;
       } else {
         errors.addAll(result.errors);
       }
