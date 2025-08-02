@@ -1,6 +1,7 @@
 ## 1.0.0-dev.10
 
 - Add a String type only JSON Schema class
+- Add a Boolean type only JSON Schema class
 
 
 ## 1.0.0-dev.9

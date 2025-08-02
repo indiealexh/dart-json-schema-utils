@@ -8,6 +8,10 @@ void main() {
   // Part 2: StringJsonSchema example
   print('\n\n=== StringJsonSchema Example ===');
   stringJsonSchemaExample();
+
+  // Part 3: BooleanJsonSchema example
+  print('\n\n=== BooleanJsonSchema Example ===');
+  booleanJsonSchemaExample();
 }
 
 void generalJsonSchemaExample() {
@@ -217,4 +221,99 @@ void stringJsonSchemaExample() {
     bool isValid = passwordSchema.validateString(password);
     print('  "${password}": ${isValid ? 'Valid' : 'Invalid'}');
   }
+}
+
+void booleanJsonSchemaExample() {
+  print('Creating a BooleanJsonSchema for feature flag validation...');
+
+  // Create a BooleanJsonSchema for feature flag validation
+  var featureFlagSchema = BooleanJsonSchema()
+    ..title = "Feature Flag Schema"
+    ..description = "A schema for validating feature flag values"
+    ..defaultValue = false;
+
+  print('Schema created: ${featureFlagSchema.toJson()}');
+
+  // Test valid boolean values
+  print('\nValidating valid boolean values:');
+  var validBooleans = [true, false];
+
+  for (var value in validBooleans) {
+    bool isValid = featureFlagSchema.validateBoolean(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Test invalid boolean values
+  print('\nValidating invalid boolean values:');
+  var invalidValues = [
+    'true', // String, not boolean
+    1, // Number, not boolean
+    0, // Number, not boolean
+    {}, // Object, not boolean
+    [], // Array, not boolean
+  ];
+
+  for (var value in invalidValues) {
+    bool isValid = featureFlagSchema.validateBoolean(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to string...');
+    featureFlagSchema.type = JsonType.string;
+    print('  Failed: Should not allow setting type to string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to a valid boolean...');
+    featureFlagSchema.defaultValue = true;
+    print('  Success: defaultValue set to ${featureFlagSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a string...');
+    featureFlagSchema.defaultValue = 'true';
+    print('  Failed: Should not allow setting defaultValue to a string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Create a schema with enum constraint
+  print('\nCreating a BooleanJsonSchema with enum constraint...');
+  var adminFlagSchema = BooleanJsonSchema()
+    ..title = "Admin Flag Schema"
+    ..description = "A schema for validating admin flag values"
+    ..enumValues =
+        [true] // Only true is allowed
+    ..defaultValue = true;
+
+  print('Schema created: ${adminFlagSchema.toJson()}');
+
+  // Test enum constraint
+  print('\nTesting enum constraint:');
+  print(
+    '  true: ${adminFlagSchema.validateBoolean(true) ? 'Valid' : 'Invalid'}',
+  );
+  print(
+    '  false: ${adminFlagSchema.validateBoolean(false) ? 'Valid' : 'Invalid'}',
+  );
+
+  // Demonstrate const constraint
+  print('\nDemonstrating const constraint:');
+  var readOnlySchema = BooleanJsonSchema()
+    ..title = "Read-Only Flag Schema"
+    ..description = "A schema for a read-only flag that is always true"
+    ..constValue = true;
+
+  print('Schema created: ${readOnlySchema.toJson()}');
+  print(
+    '  true: ${readOnlySchema.validateBoolean(true) ? 'Valid' : 'Invalid'}',
+  );
+  print(
+    '  false: ${readOnlySchema.validateBoolean(false) ? 'Valid' : 'Invalid'}',
+  );
 }

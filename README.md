@@ -1,5 +1,10 @@
 # json_schema_utils
 
+> [!WARNING]
+> This Library is under active development and should be considered experimental and subject to large scale change.
+> Please provide feedback of any missing features or bugs!
+
+
 ![JSONSchema Utils Logo](https://raw.githubusercontent.com/indiealexh/dart-json-schema-utils/refs/heads/main/doc/assets/dart-json-schema-utils-header.webp)
 
 JSONSchema Utils provides tools to help programmatically build JSONSchema Documents
