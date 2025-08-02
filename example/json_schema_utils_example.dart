@@ -28,6 +28,10 @@ void main() {
   // Part 7: ArrayJsonSchema example
   print('\n\n=== ArrayJsonSchema Example ===');
   arrayJsonSchemaExample();
+
+  // Part 8: Validation Error Reporting example
+  print('\n\n=== Validation Error Reporting Example ===');
+  validationErrorReportingExample();
 }
 
 void generalJsonSchemaExample() {
@@ -870,8 +874,7 @@ void arrayJsonSchemaExample() {
     ..title = "Contains Schema"
     ..description =
         "A schema for validating arrays that contain at least one even number"
-    ..contains = JsonSchema()
-    ..type = JsonType.number
+    ..contains = NumberJsonSchema()
     ..multipleOf = 2;
 
   print('Schema created: ${containsSchema.toJson()}');
@@ -933,4 +936,140 @@ void arrayJsonSchemaExample() {
     bool isValid = constSchema.validateArray(array);
     print('  $array: ${isValid ? 'Valid' : 'Invalid'}');
   }
+}
+
+void validationErrorReportingExample() {
+  print('Demonstrating the new structured error reporting system...');
+
+  // Example 1: String validation with detailed error reporting
+  print('\n1. String Validation with Detailed Error Reporting:');
+  var emailSchema = StringJsonSchema()
+    ..title = "Email Schema"
+    ..description = "A schema for validating email addresses"
+    ..format = "email"
+    ..minLength = 5
+    ..maxLength = 100;
+
+  print('Validating an invalid email address:');
+  var invalidEmail = 'not-an-email';
+
+  // Using the new validate method that returns a ValidationResult
+  var result = emailSchema.validate(invalidEmail, '/user/email');
+
+  if (!result.isValid) {
+    print('  Validation failed with ${result.errors.length} errors:');
+    for (var error in result.errors) {
+      print('  - Error at ${error.path}:');
+      print('    Keyword: ${error.keyword}');
+      print('    Message: ${error.message}');
+      print('    Expected: ${error.expected}, Actual: ${error.actual}');
+    }
+  }
+
+  // Example 2: Number validation with multiple errors
+  print('\n2. Number Validation with Multiple Errors:');
+  var ageSchema = NumberJsonSchema()
+    ..title = "Age Schema"
+    ..description = "A schema for validating age values"
+    ..minimum = 18
+    ..maximum = 120
+    ..multipleOf = 1; // Integer values only
+
+  print('Validating an invalid age value:');
+  var invalidAge = 16.5; // Too young and not an integer
+
+  result = ageSchema.validate(invalidAge, '/user/age');
+
+  if (!result.isValid) {
+    print('  Validation failed with ${result.errors.length} errors:');
+    for (var error in result.errors) {
+      print('  - Error at ${error.path}:');
+      print('    Keyword: ${error.keyword}');
+      print('    Message: ${error.message}');
+    }
+  }
+
+  // Example 3: Filtering errors by keyword
+  print('\n3. Filtering Errors by Keyword:');
+
+  // Get only multipleOf errors
+  var multipleOfErrors = result.forKeyword('multipleOf');
+
+  print('  multipleOf errors: ${multipleOfErrors.errors.length}');
+  for (var error in multipleOfErrors.errors) {
+    print('  - ${error.message}');
+  }
+
+  // Example 4: Complex object validation with nested errors
+  print('\n4. Complex Object Validation with Nested Errors:');
+
+  // Create a schema for a user profile
+  var nameSchema = StringJsonSchema()..minLength = 3;
+
+  var emailSchema2 = StringJsonSchema()..format = 'email';
+
+  var ageSchema2 = NumberJsonSchema()
+    ..minimum = 18
+    ..maximum = 120;
+
+  // Create a user profile with invalid data
+  var invalidUser = {
+    'name': 'Jo', // Too short
+    'email': 'not-an-email', // Invalid format
+    'age': 16, // Too young
+  };
+
+  print('Validating an invalid user profile:');
+  print('  $invalidUser');
+
+  // Validate each field and collect errors
+  var nameResult = nameSchema.validate(
+    invalidUser['name'] as String?,
+    '/user/name',
+  );
+  var emailResult = emailSchema2.validate(
+    invalidUser['email'] as String?,
+    '/user/email',
+  );
+  var ageResult = ageSchema2.validate(invalidUser['age'], '/user/age');
+
+  // Combine all validation results
+  var combinedResult = ValidationResult.combine([
+    nameResult,
+    emailResult,
+    ageResult,
+  ]);
+
+  if (!combinedResult.isValid) {
+    print('  Validation failed with ${combinedResult.errors.length} errors:');
+    for (var error in combinedResult.errors) {
+      print('  - Error at ${error.path}:');
+      print('    Keyword: ${error.keyword}');
+      print('    Message: ${error.message}');
+    }
+  }
+
+  // Example 5: Backward compatibility
+  print('\n5. Backward Compatibility:');
+
+  // Using the old boolean validation method
+  bool isValid = nameSchema.validateString(invalidUser['name'] as String?);
+  print('  Using validateString(): ${isValid ? 'Valid' : 'Invalid'}');
+
+  // Using the old exception-throwing validation method
+  try {
+    nameSchema.validateStringWithExceptions(invalidUser['name'] as String?);
+    print('  Using validateStringWithExceptions(): Valid');
+  } catch (e) {
+    print('  Using validateStringWithExceptions(): Invalid - ${e.toString()}');
+  }
+
+  print('\nThe new validation error reporting system provides:');
+  print(
+    '  1. Detailed error information (path, keyword, expected vs. actual values)',
+  );
+  print('  2. Multiple error reporting in a single validation');
+  print('  3. Error filtering capabilities');
+  print('  4. Ability to combine validation results from multiple validations');
+  print('  5. Backward compatibility with existing code');
 }

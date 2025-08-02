@@ -1,5 +1,6 @@
 import 'json_schema.dart';
 import 'json_type.dart';
+import 'validation_error.dart';
 
 /// A specialized JSON Schema class that only supports the String type.
 ///
@@ -56,37 +57,67 @@ class StringJsonSchema extends JsonSchema {
 
   /// Validates a string value against this schema.
   ///
-  /// This method checks if the provided string value satisfies all the
-  /// constraints defined in this schema (minLength, maxLength, pattern).
+  /// This method returns a [ValidationResult] object that contains detailed
+  /// information about any validation errors that occurred.
   ///
-  /// Returns true if the value is valid, false otherwise.
-  bool validateString(String? value) {
+  /// The [path] parameter specifies the JSON pointer path to the value being
+  /// validated, which is used in error messages.
+  ValidationResult validate(String? value, [String path = ""]) {
     if (value == null) {
-      return true; // null is always valid unless specified otherwise
+      return ValidationResult.success(); // null is always valid unless specified otherwise
     }
 
-    try {
-      validateStringWithExceptions(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
+    List<ValidationError> errors = [];
 
-  /// Validates a string value against this schema and throws a FormatException if invalid.
-  ///
-  /// This method is similar to validateString but throws exceptions with detailed
-  /// error messages instead of returning a boolean.
-  void validateStringWithExceptions(String? value) {
-    if (value == null) {
-      return; // null is always valid unless specified otherwise
+    // Check against const value (most restrictive)
+    if (constValue != null) {
+      if (value != constValue) {
+        errors.add(
+          ValidationError.constViolation(
+            path: path,
+            expected: constValue,
+            actual: value,
+            schema: this,
+          ),
+        );
+        return ValidationResult.failure(errors);
+      }
+      return ValidationResult.success(); // If it matches const, no need to check other constraints
+    }
+
+    // Check against enum values
+    if (enumValues != null) {
+      bool foundMatch = false;
+      for (var enumValue in enumValues!) {
+        if (value == enumValue) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) {
+        errors.add(
+          ValidationError.enumViolation(
+            path: path,
+            expected: enumValues!,
+            actual: value,
+            schema: this,
+          ),
+        );
+        return ValidationResult.failure(errors);
+      }
+      return ValidationResult.success(); // If it's in enum, no need to check other constraints
     }
 
     // Check minLength constraint
     if (minLength != null) {
       if (value.length < minLength!) {
-        throw FormatException(
-          'String length ${value.length} is less than minimum length $minLength',
+        errors.add(
+          ValidationError.minLengthViolation(
+            path: path,
+            expected: minLength!,
+            actual: value,
+            schema: this,
+          ),
         );
       }
     }
@@ -94,8 +125,13 @@ class StringJsonSchema extends JsonSchema {
     // Check maxLength constraint
     if (maxLength != null) {
       if (value.length > maxLength!) {
-        throw FormatException(
-          'String length ${value.length} exceeds maximum length $maxLength',
+        errors.add(
+          ValidationError.maxLengthViolation(
+            path: path,
+            expected: maxLength!,
+            actual: value,
+            schema: this,
+          ),
         );
       }
     }
@@ -104,13 +140,57 @@ class StringJsonSchema extends JsonSchema {
     if (pattern != null) {
       RegExp regex = RegExp(pattern!);
       if (!regex.hasMatch(value)) {
-        throw FormatException('String does not match pattern: $pattern');
+        errors.add(
+          ValidationError.patternViolation(
+            path: path,
+            pattern: pattern!,
+            actual: value,
+            schema: this,
+          ),
+        );
       }
     }
 
     // Check format constraint if implemented
     if (format != null) {
-      validateFormat(value, format!);
+      try {
+        validateFormat(value, format!);
+      } catch (e) {
+        errors.add(
+          ValidationError.formatViolation(
+            path: path,
+            format: format!,
+            actual: value,
+            details: e.toString().replaceAll('FormatException: ', ''),
+            schema: this,
+          ),
+        );
+      }
+    }
+
+    return errors.isEmpty
+        ? ValidationResult.success()
+        : ValidationResult.failure(errors);
+  }
+
+  /// Validates a string value against this schema.
+  ///
+  /// This method checks if the provided string value satisfies all the
+  /// constraints defined in this schema (minLength, maxLength, pattern).
+  ///
+  /// Returns true if the value is valid, false otherwise.
+  bool validateString(String? value) {
+    return validate(value).isValid;
+  }
+
+  /// Validates a string value against this schema and throws a FormatException if invalid.
+  ///
+  /// This method is similar to validateString but throws exceptions with detailed
+  /// error messages instead of returning a boolean.
+  void validateStringWithExceptions(String? value) {
+    ValidationResult result = validate(value);
+    if (!result.isValid) {
+      throw FormatException(result.errors.first.message);
     }
   }
 

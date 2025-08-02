@@ -11,3 +11,4 @@ export 'src/number_json_schema.dart' show NumberJsonSchema;
 export 'src/null_json_schema.dart' show NullJsonSchema;
 export 'src/object_json_schema.dart' show ObjectJsonSchema;
 export 'src/array_json_schema.dart' show ArrayJsonSchema;
+export 'src/validation_error.dart' show ValidationError, ValidationResult;

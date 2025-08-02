@@ -1,5 +1,6 @@
 import 'json_schema.dart';
 import 'json_type.dart';
+import 'validation_error.dart';
 
 /// A specialized JSON Schema class that only supports the Number type.
 ///
@@ -56,45 +57,45 @@ class NumberJsonSchema extends JsonSchema {
 
   /// Validates a numeric value against this schema.
   ///
-  /// This method checks if the provided value is a valid number and satisfies
-  /// all constraints defined in this schema (multipleOf, minimum, maximum, etc.).
+  /// This method returns a [ValidationResult] object that contains detailed
+  /// information about any validation errors that occurred.
   ///
-  /// Returns true if the value is valid, false otherwise.
-  bool validateNumber(dynamic value) {
+  /// The [path] parameter specifies the JSON pointer path to the value being
+  /// validated, which is used in error messages.
+  ValidationResult validate(dynamic value, [String path = ""]) {
     if (value == null) {
-      return true; // null is always valid unless specified otherwise
+      return ValidationResult.success(); // null is always valid unless specified otherwise
     }
 
-    try {
-      validateNumberWithExceptions(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Validates a numeric value against this schema and throws a FormatException if invalid.
-  ///
-  /// This method is similar to validateNumber but throws exceptions with detailed
-  /// error messages instead of returning a boolean.
-  void validateNumberWithExceptions(dynamic value) {
-    if (value == null) {
-      return; // null is always valid unless specified otherwise
-    }
+    List<ValidationError> errors = [];
 
     // Check type
     if (value is! num) {
-      throw FormatException('Value must be a number');
+      errors.add(
+        ValidationError.typeMismatch(
+          path: path,
+          expected: JsonType.number,
+          actual: value,
+          schema: this,
+        ),
+      );
+      return ValidationResult.failure(errors);
     }
 
     // Check against const value (most restrictive)
     if (constValue != null) {
       if (value != constValue) {
-        throw FormatException(
-          'Value must be equal to const value: $constValue',
+        errors.add(
+          ValidationError.constViolation(
+            path: path,
+            expected: constValue,
+            actual: value,
+            schema: this,
+          ),
         );
+        return ValidationResult.failure(errors);
       }
-      return; // If it matches const, no need to check other constraints
+      return ValidationResult.success(); // If it matches const, no need to check other constraints
     }
 
     // Check against enum values
@@ -107,33 +108,57 @@ class NumberJsonSchema extends JsonSchema {
         }
       }
       if (!foundMatch) {
-        throw FormatException(
-          'Value must be one of the enum values: $enumValues',
+        errors.add(
+          ValidationError.enumViolation(
+            path: path,
+            expected: enumValues!,
+            actual: value,
+            schema: this,
+          ),
         );
+        return ValidationResult.failure(errors);
       }
-      return; // If it's in enum, no need to check other constraints
+      return ValidationResult.success(); // If it's in enum, no need to check other constraints
     }
 
     // Check multipleOf constraint
     if (multipleOf != null) {
       if ((value / multipleOf!).truncateToDouble() != value / multipleOf!) {
-        throw FormatException('Value must be a multiple of $multipleOf');
+        errors.add(
+          ValidationError.multipleOfViolation(
+            path: path,
+            divisor: multipleOf!,
+            actual: value,
+            schema: this,
+          ),
+        );
       }
     }
 
     // Check minimum constraints (check minimum before maximum for logical order)
     if (minimum != null) {
       if (value < minimum!) {
-        throw FormatException(
-          'Value must be greater than or equal to minimum: $minimum',
+        errors.add(
+          ValidationError.minimumViolation(
+            path: path,
+            expected: minimum!,
+            actual: value,
+            schema: this,
+          ),
         );
       }
     }
 
     if (exclusiveMinimum != null) {
       if (value <= exclusiveMinimum!) {
-        throw FormatException(
-          'Value must be greater than exclusive minimum: $exclusiveMinimum',
+        errors.add(
+          ValidationError.minimumViolation(
+            path: path,
+            expected: exclusiveMinimum!,
+            actual: value,
+            schema: this,
+            exclusive: true,
+          ),
         );
       }
     }
@@ -141,17 +166,58 @@ class NumberJsonSchema extends JsonSchema {
     // Check maximum constraints
     if (maximum != null) {
       if (value > maximum!) {
-        throw FormatException(
-          'Value must be less than or equal to maximum: $maximum',
+        errors.add(
+          ValidationError.maximumViolation(
+            path: path,
+            expected: maximum!,
+            actual: value,
+            schema: this,
+          ),
         );
       }
     }
 
     if (exclusiveMaximum != null) {
       if (value >= exclusiveMaximum!) {
-        throw FormatException(
-          'Value must be less than exclusive maximum: $exclusiveMaximum',
+        errors.add(
+          ValidationError.maximumViolation(
+            path: path,
+            expected: exclusiveMaximum!,
+            actual: value,
+            schema: this,
+            exclusive: true,
+          ),
         );
+      }
+    }
+
+    return errors.isEmpty
+        ? ValidationResult.success()
+        : ValidationResult.failure(errors);
+  }
+
+  /// Validates a numeric value against this schema.
+  ///
+  /// This method checks if the provided value is a valid number and satisfies
+  /// all constraints defined in this schema (multipleOf, minimum, maximum, etc.).
+  ///
+  /// Returns true if the value is valid, false otherwise.
+  bool validateNumber(dynamic value) {
+    return validate(value).isValid;
+  }
+
+  /// Validates a numeric value against this schema and throws a FormatException if invalid.
+  ///
+  /// This method is similar to validateNumber but throws exceptions with detailed
+  /// error messages instead of returning a boolean.
+  void validateNumberWithExceptions(dynamic value) {
+    ValidationResult result = validate(value);
+    if (!result.isValid) {
+      // For backward compatibility with existing tests
+      if (result.errors.first.keyword == 'type') {
+        throw FormatException('Value must be a number');
+      } else {
+        throw FormatException(result.errors.first.message);
       }
     }
   }
