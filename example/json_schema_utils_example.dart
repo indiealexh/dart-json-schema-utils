@@ -16,6 +16,10 @@ void main() {
   // Part 4: NumberJsonSchema example
   print('\n\n=== NumberJsonSchema Example ===');
   numberJsonSchemaExample();
+
+  // Part 5: NullJsonSchema example
+  print('\n\n=== NullJsonSchema Example ===');
+  nullJsonSchemaExample();
 }
 
 void generalJsonSchemaExample() {
@@ -438,4 +442,88 @@ void numberJsonSchemaExample() {
     bool isValid = piSchema.validateNumber(value);
     print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
   }
+}
+
+void nullJsonSchemaExample() {
+  print('Creating a NullJsonSchema for optional field validation...');
+
+  // Create a NullJsonSchema for optional field validation
+  var optionalFieldSchema = NullJsonSchema()
+    ..title = "Optional Field Schema"
+    ..description =
+        "A schema for validating optional fields that can only be null"
+    ..defaultValue = null;
+
+  print('Schema created: ${optionalFieldSchema.toJson()}');
+
+  // Test valid null value
+  print('\nValidating valid null value:');
+  bool isValid = optionalFieldSchema.validateNull(null);
+  print('  null: ${isValid ? 'Valid' : 'Invalid'}');
+
+  // Test invalid non-null values
+  print('\nValidating invalid non-null values:');
+  var invalidValues = [
+    'string', // String, not null
+    123, // Number, not null
+    true, // Boolean, not null
+    [1, 2, 3], // Array, not null
+    {'key': 'value'}, // Object, not null
+  ];
+
+  for (var value in invalidValues) {
+    bool isValid = optionalFieldSchema.validateNull(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to string...');
+    optionalFieldSchema.type = JsonType.string;
+    print('  Failed: Should not allow setting type to string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to null...');
+    optionalFieldSchema.defaultValue = null;
+    print('  Success: defaultValue set to ${optionalFieldSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a string...');
+    optionalFieldSchema.defaultValue = 'value';
+    print('  Failed: Should not allow setting defaultValue to a string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Create a schema with enum constraint
+  print('\nCreating a NullJsonSchema with enum constraint...');
+  var nullEnumSchema = NullJsonSchema()
+    ..title = "Null Enum Schema"
+    ..description = "A schema for validating null values with enum constraint"
+    ..enumValues = [null];
+
+  print('Schema created: ${nullEnumSchema.toJson()}');
+
+  // Test enum constraint
+  print('\nTesting enum constraint:');
+  print('  null: ${nullEnumSchema.validateNull(null) ? 'Valid' : 'Invalid'}');
+  print(
+    '  "value": ${nullEnumSchema.validateNull("value") ? 'Valid' : 'Invalid'}',
+  );
+
+  // Demonstrate const constraint
+  print('\nDemonstrating const constraint:');
+  var nullConstSchema = NullJsonSchema()
+    ..title = "Null Const Schema"
+    ..description = "A schema for validating null values with const constraint"
+    ..constValue = null;
+
+  print('Schema created: ${nullConstSchema.toJson()}');
+  print('  null: ${nullConstSchema.validateNull(null) ? 'Valid' : 'Invalid'}');
+  print('  123: ${nullConstSchema.validateNull(123) ? 'Valid' : 'Invalid'}');
 }
