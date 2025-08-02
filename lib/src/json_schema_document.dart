@@ -33,9 +33,6 @@ class JsonSchemaDocument extends JsonSchema with JsonSchemaIdRequired {
   JsonSchemaDocument._internal(this.id, this.title, this.description);
 }
 
-// class JsonSchema extends JsonSchemaBase {
-// }
-
 mixin JsonSchemaIdRequired {
   String get schema;
 
