@@ -20,6 +20,10 @@ void main() {
   // Part 5: NullJsonSchema example
   print('\n\n=== NullJsonSchema Example ===');
   nullJsonSchemaExample();
+
+  // Part 6: ObjectJsonSchema example
+  print('\n\n=== ObjectJsonSchema Example ===');
+  objectJsonSchemaExample();
 }
 
 void generalJsonSchemaExample() {
@@ -227,7 +231,7 @@ void stringJsonSchemaExample() {
 
   for (var password in passwords) {
     bool isValid = passwordSchema.validateString(password);
-    print('  "${password}": ${isValid ? 'Valid' : 'Invalid'}');
+    print('  "$password": ${isValid ? 'Valid' : 'Invalid'}');
   }
 }
 
@@ -526,4 +530,207 @@ void nullJsonSchemaExample() {
   print('Schema created: ${nullConstSchema.toJson()}');
   print('  null: ${nullConstSchema.validateNull(null) ? 'Valid' : 'Invalid'}');
   print('  123: ${nullConstSchema.validateNull(123) ? 'Valid' : 'Invalid'}');
+}
+
+void objectJsonSchemaExample() {
+  print('Creating an ObjectJsonSchema for user profile validation...');
+
+  // Create an ObjectJsonSchema for user profile validation
+  var userProfileSchema = ObjectJsonSchema()
+    ..title = "User Profile Schema"
+    ..description = "A schema for validating user profile objects"
+    ..required = ['id', 'name', 'email']
+    ..minProperties = 3
+    ..maxProperties = 10;
+
+  print('Schema created: ${userProfileSchema.toJson()}');
+
+  // Create schemas for individual properties
+  var idSchema = JsonSchema()
+    ..type = JsonType.string
+    ..pattern = r'^[a-zA-Z0-9-]+$';
+
+  var nameSchema = JsonSchema()
+    ..type = JsonType.string
+    ..minLength = 2
+    ..maxLength = 50;
+
+  var emailSchema = JsonSchema()
+    ..type = JsonType.string
+    ..format = 'email';
+
+  var ageSchema = JsonSchema()
+    ..type = JsonType.integer
+    ..minimum = 0
+    ..maximum = 120;
+
+  // Add property schemas to the user profile schema
+  userProfileSchema.properties = {
+    'id': idSchema,
+    'name': nameSchema,
+    'email': emailSchema,
+    'age': ageSchema,
+  };
+
+  // Add pattern properties for custom fields
+  var stringSchema = JsonSchema()..type = JsonType.string;
+
+  userProfileSchema.patternProperties = {'^custom_': stringSchema};
+
+  // Restrict additional properties
+  userProfileSchema.additionalProperties = false;
+
+  print('\nSchema with properties defined: ${userProfileSchema.toJson()}');
+
+  // Test valid user profiles
+  print('\nValidating valid user profiles:');
+  var validProfiles = [
+    {
+      'id': 'user-123',
+      'name': 'John Doe',
+      'email': 'john@example.com',
+      'age': 30,
+      'custom_field': 'Custom value',
+    },
+    {'id': 'user-456', 'name': 'Jane Smith', 'email': 'jane@example.com'},
+  ];
+
+  for (var profile in validProfiles) {
+    bool isValid = userProfileSchema.validateObject(profile);
+    print('  $profile: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Test invalid user profiles
+  print('\nValidating invalid user profiles:');
+  var invalidProfiles = [
+    {
+      'id': 'user-123',
+      'name': 'John Doe',
+      // Missing required email field
+    },
+    {
+      'id': 'user-456',
+      'name': 'J', // Name too short
+      'email': 'not-an-email',
+    },
+    {
+      'id': 'user-789',
+      'name': 'Bob Smith',
+      'email': 'bob@example.com',
+      'age': 150, // Age above maximum
+    },
+    {
+      'id': 'user-101',
+      'name': 'Alice Johnson',
+      'email': 'alice@example.com',
+      'invalid_field':
+          'This field is not allowed', // Additional property not allowed
+    },
+  ];
+
+  for (var profile in invalidProfiles) {
+    bool isValid = userProfileSchema.validateObject(profile);
+    print('  $profile: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate property dependencies
+  print('\nDemonstrating property dependencies:');
+  var addressSchema = ObjectJsonSchema()
+    ..title = "Address Schema"
+    ..description = "A schema for validating address objects with dependencies"
+    ..dependencies = {
+      'shipping_address': ['billing_address'],
+    };
+
+  print('Schema created: ${addressSchema.toJson()}');
+
+  var validAddresses = [
+    {}, // Empty object is valid
+    {'billing_address': '123 Main St'}, // Only billing address is valid
+    {
+      'shipping_address': '456 Elm St',
+      'billing_address': '123 Main St',
+    }, // Both addresses are valid
+  ];
+
+  var invalidAddresses = [
+    {'shipping_address': '456 Elm St'}, // Missing dependent property
+  ];
+
+  print('\nValidating addresses with dependencies:');
+  for (var address in validAddresses) {
+    bool isValid = addressSchema.validateObject(address);
+    print('  $address: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  for (var address in invalidAddresses) {
+    bool isValid = addressSchema.validateObject(address);
+    print('  $address: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate property names validation
+  print('\nDemonstrating property names validation:');
+  var configSchema = ObjectJsonSchema()
+    ..title = "Config Schema"
+    ..description =
+        "A schema for validating configuration objects with property name constraints";
+
+  var propNameSchema = JsonSchema()
+    ..type = JsonType.string
+    ..pattern = r'^[a-z][a-z0-9_]*$';
+
+  configSchema.propertyNames = propNameSchema;
+
+  print('Schema created: ${configSchema.toJson()}');
+
+  var validConfigs = [
+    {}, // Empty object is valid
+    {'setting1': 'value1', 'setting2': 'value2'},
+    {'api_key': '12345', 'timeout_ms': 5000},
+  ];
+
+  var invalidConfigs = [
+    {'Setting1': 'value1'}, // Starts with uppercase
+    {'1setting': 'value1'}, // Starts with number
+    {'api-key': '12345'}, // Contains hyphen
+  ];
+
+  print('\nValidating configs with property name constraints:');
+  for (var config in validConfigs) {
+    bool isValid = configSchema.validateObject(config);
+    print('  $config: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  for (var config in invalidConfigs) {
+    bool isValid = configSchema.validateObject(config);
+    print('  $config: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to string...');
+    userProfileSchema.type = JsonType.string;
+    print('  Failed: Should not allow setting type to string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to a valid object...');
+    userProfileSchema.defaultValue = {
+      'id': 'default-user',
+      'name': 'Default User',
+      'email': 'default@example.com',
+    };
+    print('  Success: defaultValue set to ${userProfileSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a string...');
+    userProfileSchema.defaultValue = 'not-an-object';
+    print('  Failed: Should not allow setting defaultValue to a string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
 }

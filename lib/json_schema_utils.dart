@@ -9,3 +9,4 @@ export 'src/string_json_schema.dart' show StringJsonSchema;
 export 'src/boolean_json_schema.dart' show BooleanJsonSchema;
 export 'src/number_json_schema.dart' show NumberJsonSchema;
 export 'src/null_json_schema.dart' show NullJsonSchema;
+export 'src/object_json_schema.dart' show ObjectJsonSchema;
