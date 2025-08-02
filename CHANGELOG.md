@@ -1,3 +1,13 @@
+## 1.0.0-dev.8
+
+- Move Docs directory to Doc to comply with Dart best practices
+
+## 1.0.0-dev.7
+
+- Update Basic Example to show more usage
+- Improve Feature list in README
+- Add planned Features to README
+
 ## 1.0.0-dev.6
 
 - Fix README image link
