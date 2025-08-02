@@ -24,6 +24,10 @@ void main() {
   // Part 6: ObjectJsonSchema example
   print('\n\n=== ObjectJsonSchema Example ===');
   objectJsonSchemaExample();
+
+  // Part 7: ArrayJsonSchema example
+  print('\n\n=== ArrayJsonSchema Example ===');
+  arrayJsonSchemaExample();
 }
 
 void generalJsonSchemaExample() {
@@ -732,5 +736,201 @@ void objectJsonSchemaExample() {
     print('  Failed: Should not allow setting defaultValue to a string');
   } catch (e) {
     print('  Success: ${e.toString()}');
+  }
+}
+
+void arrayJsonSchemaExample() {
+  print('Creating an ArrayJsonSchema for list validation...');
+
+  // Create an ArrayJsonSchema for list validation
+  var listSchema = ArrayJsonSchema()
+    ..title = "List Schema"
+    ..description = "A schema for validating lists of items"
+    ..minItems = 1
+    ..maxItems = 10
+    ..uniqueItems = true;
+
+  print('Schema created: ${listSchema.toJson()}');
+
+  // Test valid arrays
+  print('\nValidating valid arrays:');
+  var validArrays = [
+    [1, 2, 3],
+    ['a', 'b', 'c'],
+    [true, false],
+    [1.5, 2.5, 3.5],
+  ];
+
+  for (var value in validArrays) {
+    bool isValid = listSchema.validateArray(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Test invalid arrays
+  print('\nValidating invalid arrays:');
+  var invalidArrays = [
+    [], // Too few items
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // Too many items
+    [1, 2, 2], // Duplicate items
+    'not an array', // Not an array
+    123, // Not an array
+    true, // Not an array
+    {'key': 'value'}, // Not an array
+  ];
+
+  for (var value in invalidArrays) {
+    bool isValid = listSchema.validateArray(value);
+    print('  $value: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate type restriction
+  print('\nDemonstrating type restriction:');
+  try {
+    print('  Attempting to set type to string...');
+    listSchema.type = JsonType.string;
+    print('  Failed: Should not allow setting type to string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Demonstrate defaultValue restriction
+  print('\nDemonstrating defaultValue restriction:');
+  try {
+    print('  Setting defaultValue to a valid array...');
+    listSchema.defaultValue = [1, 2, 3];
+    print('  Success: defaultValue set to ${listSchema.defaultValue}');
+
+    print('  Attempting to set defaultValue to a string...');
+    listSchema.defaultValue = 'not an array';
+    print('  Failed: Should not allow setting defaultValue to a string');
+  } catch (e) {
+    print('  Success: ${e.toString()}');
+  }
+
+  // Create a schema with items constraint
+  print('\nCreating an ArrayJsonSchema with items constraint...');
+  var numberSchema = JsonSchema()
+    ..type = JsonType.number
+    ..minimum = 0
+    ..maximum = 100;
+
+  var numbersArraySchema = ArrayJsonSchema()
+    ..title = "Numbers Array Schema"
+    ..description = "A schema for validating arrays of numbers"
+    ..items = numberSchema;
+
+  print('Schema created: ${numbersArraySchema.toJson()}');
+
+  // Test items constraint
+  print('\nTesting items constraint:');
+  var numberArrays = [
+    [10, 20, 30],
+    [0, 50, 100],
+    [-10, 20, 30], // Contains negative number
+    [10, 20, 'string'], // Contains non-number
+    [10, 20, 110], // Contains number > 100
+  ];
+
+  for (var array in numberArrays) {
+    bool isValid = numbersArraySchema.validateArray(array);
+    print('  $array: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Create a schema with tuple validation
+  print('\nCreating an ArrayJsonSchema for tuple validation...');
+  var stringSchema = JsonSchema()..type = JsonType.string;
+
+  var booleanSchema = JsonSchema()..type = JsonType.boolean;
+
+  var tupleSchema = ArrayJsonSchema()
+    ..title = "Tuple Schema"
+    ..description = "A schema for validating tuples [string, number, boolean]"
+    ..items = [stringSchema, numberSchema, booleanSchema]
+    ..additionalItems = false; // No additional items allowed
+
+  print('Schema created: ${tupleSchema.toJson()}');
+
+  // Test tuple validation
+  print('\nTesting tuple validation:');
+  var tuples = [
+    ['name', 25, true], // Valid tuple
+    ['name', 25], // Valid partial tuple
+    ['name', 25, true, 'extra'], // Invalid - extra item
+    [25, 'name', true], // Invalid - wrong order
+  ];
+
+  for (var tuple in tuples) {
+    bool isValid = tupleSchema.validateArray(tuple);
+    print('  $tuple: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Create a schema with contains constraint
+  print('\nCreating an ArrayJsonSchema with contains constraint...');
+  var containsSchema = ArrayJsonSchema()
+    ..title = "Contains Schema"
+    ..description =
+        "A schema for validating arrays that contain at least one even number"
+    ..contains = JsonSchema()
+    ..type = JsonType.number
+    ..multipleOf = 2;
+
+  print('Schema created: ${containsSchema.toJson()}');
+
+  // Test contains constraint
+  print('\nTesting contains constraint:');
+  var containsArrays = [
+    [1, 2, 3], // Contains even number
+    [2, 4, 6], // All even numbers
+    [1, 3, 5], // No even numbers
+    [], // Empty array
+  ];
+
+  for (var array in containsArrays) {
+    bool isValid = containsSchema.validateArray(array);
+    print('  $array: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate enum constraint
+  print('\nDemonstrating enum constraint:');
+  var enumSchema = ArrayJsonSchema()
+    ..title = "Enum Schema"
+    ..description = "A schema for validating arrays with enum constraint"
+    ..enumValues = [
+      [1, 2, 3],
+      ['a', 'b', 'c'],
+    ];
+
+  print('Schema created: ${enumSchema.toJson()}');
+
+  var enumArrays = [
+    [1, 2, 3], // In enum
+    ['a', 'b', 'c'], // In enum
+    [4, 5, 6], // Not in enum
+    [], // Not in enum
+  ];
+
+  for (var array in enumArrays) {
+    bool isValid = enumSchema.validateArray(array);
+    print('  $array: ${isValid ? 'Valid' : 'Invalid'}');
+  }
+
+  // Demonstrate const constraint
+  print('\nDemonstrating const constraint:');
+  var constSchema = ArrayJsonSchema()
+    ..title = "Const Schema"
+    ..description = "A schema for validating arrays with const constraint"
+    ..constValue = [1, 2, 3];
+
+  print('Schema created: ${constSchema.toJson()}');
+
+  var constArrays = [
+    [1, 2, 3], // Equal to const
+    [3, 2, 1], // Not equal to const
+    [1, 2], // Not equal to const
+  ];
+
+  for (var array in constArrays) {
+    bool isValid = constSchema.validateArray(array);
+    print('  $array: ${isValid ? 'Valid' : 'Invalid'}');
   }
 }

@@ -5,6 +5,7 @@
 - Add a Number type only JSON Schema class
 - Add a Null type only JSON Schema class
 - Add an Object type only JSON Schema class
+- Add an Array type only JSON Schema class
 
 
 ## 1.0.0-dev.9
