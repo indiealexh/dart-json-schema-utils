@@ -1,5 +1,7 @@
+import '../cross_type_validator.dart';
 import '../json_schema.dart';
 import '../json_type.dart';
+import '../validation_error.dart';
 
 /// A specialized JSON Schema class that only supports the Boolean type.
 ///
@@ -56,21 +58,27 @@ class BooleanJsonSchema extends JsonSchema {
 
   /// Validates a boolean value against this schema.
   ///
+  /// This method returns a [ValidationResult] object that contains detailed
+  /// information about any validation errors that occurred.
+  ///
+  /// The [path] parameter specifies the JSON pointer path to the value being
+  /// validated, which is used in error messages.
+  ValidationResult validate(dynamic value, [String path = ""]) {
+    // For backward compatibility, null is always valid
+    if (value == null) {
+      return ValidationResult.success();
+    }
+    return CrossTypeValidator.validate(value, this, path);
+  }
+
+  /// Validates a boolean value against this schema.
+  ///
   /// This method checks if the provided value is a valid boolean and satisfies
   /// all constraints defined in this schema (enum, const).
   ///
   /// Returns true if the value is valid, false otherwise.
   bool validateBoolean(dynamic value) {
-    if (value == null) {
-      return true; // null is always valid unless specified otherwise
-    }
-
-    try {
-      validateBooleanWithExceptions(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return validate(value).isValid;
   }
 
   /// Validates a boolean value against this schema and throws a FormatException if invalid.
@@ -78,38 +86,13 @@ class BooleanJsonSchema extends JsonSchema {
   /// This method is similar to validateBoolean but throws exceptions with detailed
   /// error messages instead of returning a boolean.
   void validateBooleanWithExceptions(dynamic value) {
-    if (value == null) {
-      return; // null is always valid unless specified otherwise
-    }
-
-    // Check type
-    if (value is! bool) {
-      throw FormatException('Value must be a boolean');
-    }
-
-    // Check against const value (most restrictive)
-    if (constValue != null) {
-      if (value != constValue) {
-        throw FormatException(
-          'Value must be equal to const value: $constValue',
-        );
-      }
-      return; // If it matches const, no need to check other constraints
-    }
-
-    // Check against enum values
-    if (enumValues != null) {
-      bool foundMatch = false;
-      for (var enumValue in enumValues!) {
-        if (value == enumValue) {
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch) {
-        throw FormatException(
-          'Value must be one of the enum values: $enumValues',
-        );
+    ValidationResult result = validate(value);
+    if (!result.isValid) {
+      // For backward compatibility with existing tests
+      if (result.errors.first.keyword == 'type') {
+        throw FormatException('Value must be a boolean');
+      } else {
+        throw FormatException(result.errors.first.message);
       }
     }
   }

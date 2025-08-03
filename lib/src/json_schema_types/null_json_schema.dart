@@ -1,5 +1,6 @@
 import '../json_schema.dart';
 import '../json_type.dart';
+import '../validation_error.dart';
 
 /// A specialized JSON Schema class that only supports the Null type.
 ///
@@ -58,17 +59,34 @@ class NullJsonSchema extends JsonSchema {
 
   /// Validates a null value against this schema.
   ///
+  /// This method returns a [ValidationResult] object that contains detailed
+  /// information about any validation errors that occurred.
+  ///
+  /// The [path] parameter specifies the JSON pointer path to the value being
+  /// validated, which is used in error messages.
+  ValidationResult validate(dynamic value, [String path = ""]) {
+    // For NullJsonSchema, null is always valid and non-null is always invalid
+    if (value == null) {
+      return ValidationResult.success();
+    }
+    return ValidationResult.failure([
+      ValidationError.typeMismatch(
+        path: path,
+        expected: JsonType.nullValue,
+        actual: value,
+        schema: this,
+      ),
+    ]);
+  }
+
+  /// Validates a null value against this schema.
+  ///
   /// This method checks if the provided value is null and satisfies
   /// all constraints defined in this schema.
   ///
   /// Returns true if the value is valid, false otherwise.
   bool validateNull(dynamic value) {
-    try {
-      validateNullWithExceptions(value);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return validate(value).isValid;
   }
 
   /// Validates a null value against this schema and throws a FormatException if invalid.
@@ -76,14 +94,14 @@ class NullJsonSchema extends JsonSchema {
   /// This method is similar to validateNull but throws exceptions with detailed
   /// error messages instead of returning a boolean.
   void validateNullWithExceptions(dynamic value) {
-    // Check type
-    if (value != null) {
-      throw FormatException('Value must be null');
+    ValidationResult result = validate(value);
+    if (!result.isValid) {
+      // For backward compatibility with existing tests
+      if (result.errors.first.keyword == 'type') {
+        throw FormatException('Value must be null');
+      } else {
+        throw FormatException(result.errors.first.message);
+      }
     }
-
-    // For null type, there's no need to check against const or enum values
-    // since there's only one possible value (null), and we've already verified
-    // that the value is null. Additionally, constValue and enumValues can only
-    // contain null values for this schema type.
   }
 }

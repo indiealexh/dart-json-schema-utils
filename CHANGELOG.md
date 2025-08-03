@@ -1,3 +1,7 @@
+## 1.0.0-dev.13
+
+- Refactor Validation to extract logic from JSON Schema Classes
+
 ## 1.0.0-dev.12
 
 - Restructure JSON schema types to improve structure

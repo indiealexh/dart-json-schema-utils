@@ -1,3 +1,4 @@
+import '../cross_type_validator.dart';
 import '../json_schema.dart';
 import '../json_type.dart';
 import '../validation_error.dart';
@@ -63,137 +64,11 @@ class NumberJsonSchema extends JsonSchema {
   /// The [path] parameter specifies the JSON pointer path to the value being
   /// validated, which is used in error messages.
   ValidationResult validate(dynamic value, [String path = ""]) {
+    // For backward compatibility, null is always valid
     if (value == null) {
-      return ValidationResult.success(); // null is always valid unless specified otherwise
+      return ValidationResult.success();
     }
-
-    List<ValidationError> errors = [];
-
-    // Check type
-    if (value is! num) {
-      errors.add(
-        ValidationError.typeMismatch(
-          path: path,
-          expected: JsonType.number,
-          actual: value,
-          schema: this,
-        ),
-      );
-      return ValidationResult.failure(errors);
-    }
-
-    // Check against const value (most restrictive)
-    if (constValue != null) {
-      if (value != constValue) {
-        errors.add(
-          ValidationError.constViolation(
-            path: path,
-            expected: constValue,
-            actual: value,
-            schema: this,
-          ),
-        );
-        return ValidationResult.failure(errors);
-      }
-      return ValidationResult.success(); // If it matches const, no need to check other constraints
-    }
-
-    // Check against enum values
-    if (enumValues != null) {
-      bool foundMatch = false;
-      for (var enumValue in enumValues!) {
-        if (value == enumValue) {
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch) {
-        errors.add(
-          ValidationError.enumViolation(
-            path: path,
-            expected: enumValues!,
-            actual: value,
-            schema: this,
-          ),
-        );
-        return ValidationResult.failure(errors);
-      }
-      return ValidationResult.success(); // If it's in enum, no need to check other constraints
-    }
-
-    // Check multipleOf constraint
-    if (multipleOf != null) {
-      if ((value / multipleOf!).truncateToDouble() != value / multipleOf!) {
-        errors.add(
-          ValidationError.multipleOfViolation(
-            path: path,
-            divisor: multipleOf!,
-            actual: value,
-            schema: this,
-          ),
-        );
-      }
-    }
-
-    // Check minimum constraints (check minimum before maximum for logical order)
-    if (minimum != null) {
-      if (value < minimum!) {
-        errors.add(
-          ValidationError.minimumViolation(
-            path: path,
-            expected: minimum!,
-            actual: value,
-            schema: this,
-          ),
-        );
-      }
-    }
-
-    if (exclusiveMinimum != null) {
-      if (value <= exclusiveMinimum!) {
-        errors.add(
-          ValidationError.minimumViolation(
-            path: path,
-            expected: exclusiveMinimum!,
-            actual: value,
-            schema: this,
-            exclusive: true,
-          ),
-        );
-      }
-    }
-
-    // Check maximum constraints
-    if (maximum != null) {
-      if (value > maximum!) {
-        errors.add(
-          ValidationError.maximumViolation(
-            path: path,
-            expected: maximum!,
-            actual: value,
-            schema: this,
-          ),
-        );
-      }
-    }
-
-    if (exclusiveMaximum != null) {
-      if (value >= exclusiveMaximum!) {
-        errors.add(
-          ValidationError.maximumViolation(
-            path: path,
-            expected: exclusiveMaximum!,
-            actual: value,
-            schema: this,
-            exclusive: true,
-          ),
-        );
-      }
-    }
-
-    return errors.isEmpty
-        ? ValidationResult.success()
-        : ValidationResult.failure(errors);
+    return CrossTypeValidator.validate(value, this, path);
   }
 
   /// Validates a numeric value against this schema.
