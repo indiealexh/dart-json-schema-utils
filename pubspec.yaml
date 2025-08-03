@@ -1,6 +1,6 @@
 name: json_schema_utils
 description: Utilities for building Json Schema Documents to ensure they are valid and assist with reducing the complexity of creating a schema manually
-version: 1.0.0-dev.12
+version: 1.0.0-dev.13
 repository: https://github.com/indiealexh/dart-json-schema-utils.git
 homepage: https://indiealexh.com/projects
 topics:
