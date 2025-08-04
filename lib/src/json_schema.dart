@@ -1,5 +1,6 @@
 import 'json_type_enum.dart';
 import 'string_format_enum.dart';
+import 'json_schema_validator.dart';
 
 /// A base class representing a JSON Schema.
 ///
@@ -90,7 +91,18 @@ class JsonSchema {
     this.notSchema,
     this.readOnly,
     this.writeOnly,
-  });
+  }) {
+    _validateSchema();
+  }
+
+  /// Validates the schema and throws an exception if validation fails.
+  /// This method should be called by subclass constructors after initialization.
+  void _validateSchema() {
+    final errors = JsonSchemaValidator.validate(this);
+    if (errors.isNotEmpty) {
+      throw JsonSchemaValidationException(errors);
+    }
+  }
 
   /// Creates a JsonSchema instance from a JSON map.
   /// This factory method will delegate to the correct subclass if specific keywords are found.
@@ -283,7 +295,9 @@ class ObjectSchema extends JsonSchema {
     this.additionalProperties,
     this.dependencies,
     this.propertyNames,
-  });
+  }) {
+    _validateSchema();
+  }
 
   /// Creates an ObjectSchema from a JSON map.
   factory ObjectSchema.fromJson(Map<String, dynamic> json) {
@@ -402,7 +416,9 @@ class ArraySchema extends JsonSchema {
     this.minItems,
     this.uniqueItems,
     this.contains,
-  });
+  }) {
+    _validateSchema();
+  }
 
   /// Creates an ArraySchema from a JSON map.
   factory ArraySchema.fromJson(Map<String, dynamic> json) {
@@ -499,7 +515,9 @@ class StringSchema extends JsonSchema {
     this.format,
     this.contentEncoding,
     this.contentMediaType,
-  });
+  }) {
+    _validateSchema();
+  }
 
   /// Creates a StringSchema from a JSON map.
   factory StringSchema.fromJson(Map<String, dynamic> json) {
@@ -579,7 +597,9 @@ class NumberSchema extends JsonSchema {
     this.exclusiveMaximum,
     this.minimum,
     this.exclusiveMinimum,
-  });
+  }) {
+    _validateSchema();
+  }
 
   /// Creates a NumberSchema from a JSON map.
   factory NumberSchema.fromJson(Map<String, dynamic> json) {
