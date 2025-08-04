@@ -14,7 +14,7 @@ Compatible with all Dart environments, including Flutter (Web, Mobile and Deskto
 ## Features
 
  - JSONSchema Support
- - Opinionated JSONSchema Document for compatibility with external $ref and schema registries
+ - Opinionated Root JSONSchema Document for compatibility with external $ref and schema registries
    - Required $schema (Currently only supports [JSON Schema Draft 7](https://json-schema.org/draft-07))
    - Required $id
    - Required title

@@ -1,3 +1,8 @@
+## 1.0.0-dev.14
+
+- Rename JsonSchemaDocument to RootJsonSchema to better reflect the language of the spec
+- 
+
 ## 1.0.0-dev.13
 
 - Refactor Validation to extract logic from JSON Schema Classes
