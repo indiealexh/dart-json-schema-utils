@@ -1,7 +1,7 @@
 /// JSONSchema Utils
 ///
 /// A library for working with JSON Schema documents.
-library json_schema_utils;
+library;
 
 export 'src/json_schema.dart';
 export 'src/json_type_enum.dart';
