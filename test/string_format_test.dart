@@ -39,6 +39,7 @@ void main() {
 
         expect(schema.format, equals(format));
 
+        // ignore: unused_local_variable
         final json = schema.toJson();
       }
     });
