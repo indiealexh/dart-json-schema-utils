@@ -1,7 +1,6 @@
 import 'dart:core';
 import 'json_schema.dart';
 import 'json_type_enum.dart';
-import 'string_format_enum.dart';
 
 /// A class for validating JsonSchema objects according to the JSON Schema draft-07 specification.
 ///
@@ -227,7 +226,7 @@ class JsonSchemaValidator {
 
       // additionalItems is only meaningful when items is an array
       // No validation needed for additionalItems itself
-    } else if (schema.additionalItems != null && !(schema.items is List)) {
+    } else if (schema.additionalItems != null && schema.items is! List) {
       // This is just a warning, not an error
       // errors.add('additionalItems is ignored when items is not an array.');
     }
