@@ -1,7 +1,6 @@
 ## 1.0.0-dev.14
 
-- Rename JsonSchemaDocument to RootJsonSchema to better reflect the language of the spec
-- 
+- Rewrite Library to simplify the use and structure
 
 ## 1.0.0-dev.13
 
