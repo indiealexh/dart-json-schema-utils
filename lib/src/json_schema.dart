@@ -1,714 +1,627 @@
-import 'dart:convert';
+import 'json_type_enum.dart';
+import 'string_format_enum.dart';
+import 'json_schema_validator.dart';
 
-import 'json_schema_base.dart';
-import 'json_type.dart';
+/// A base class representing a JSON Schema.
+///
+/// This class contains keywords that can be applied to any instance type.
+class JsonSchema {
+  /// From `$schema`: The URI identifying the dialect of the schema.
+  final Uri? schemaVersion;
 
-class JsonSchema extends JsonSchemaBase {
-  String? _id;
-  String? _schema;
-  String? _ref;
-  String? _comment;
-  String? _title;
-  String? _description;
-  dynamic _defaultValue;
-  List<dynamic>? _examples;
-  bool? _readOnly;
-  bool? _writeOnly;
-  dynamic _type;
-  List<dynamic>? _enumValues;
-  dynamic _constValue;
-  num? _multipleOf;
-  num? _maximum;
-  num? _exclusiveMaximum;
-  num? _minimum;
-  num? _exclusiveMinimum;
-  int? _maxLength;
-  int? _minLength;
-  String? _pattern;
-  dynamic _items;
-  dynamic _additionalItems;
-  int? _maxItems;
-  int? _minItems;
-  bool? _uniqueItems;
-  JsonSchemaBase? _contains;
-  int? _maxProperties;
-  int? _minProperties;
-  List<String>? _required;
-  Map<String, JsonSchemaBase>? _properties;
-  Map<String, JsonSchemaBase>? _patternProperties;
-  dynamic _additionalProperties;
-  Map<String, dynamic>? _dependencies;
-  JsonSchemaBase? _propertyNames;
-  Map<String, JsonSchemaBase>? _definitions;
-  List<JsonSchemaBase>? _allOf;
-  List<JsonSchemaBase>? _anyOf;
-  List<JsonSchemaBase>? _oneOf;
-  JsonSchemaBase? _not;
-  JsonSchemaBase? _ifSchema;
-  JsonSchemaBase? _thenSchema;
-  JsonSchemaBase? _elseSchema;
-  String? _format;
-  String? _contentMediaType;
-  String? _contentEncoding;
+  /// From `$id`: A URI for the schema, used for identification and resolution.
+  final Uri? id;
 
-  @override
-  String? get id => _id;
+  /// From `$ref`: A URI reference to another schema.
+  final Uri? ref;
 
-  set id(String? id) {
-    if (id == null || id.isEmpty) {
-      _id = null;
-      return;
-    }
-    _id = Uri.parse(id).toString();
+  /// From `$comment`: A comment for schema authors. Ignored by validators.
+  final String? comment;
+
+  /// From `title`: A short, descriptive title for the schema.
+  final String? title;
+
+  /// From `description`: A more detailed explanation of the schema's purpose.
+  final String? description;
+
+  /// From `type`: The required primitive type(s) for the instance.
+  final List<JsonType>? type;
+
+  /// From `enum`: A fixed set of allowed values for the instance.
+  final List<dynamic>? enumValues;
+
+  /// From `const`: The exact value the instance must have.
+  final dynamic constValue;
+
+  /// From `default`: A default value for the instance.
+  final dynamic defaultValue;
+
+  /// From `examples`: An array of example values that are valid against the schema.
+  final List<dynamic>? examples;
+
+  /// From `definitions`: A location for defining reusable subschemas.
+  final Map<String, JsonSchema>? definitions;
+
+  /// From `if`: If the instance validates against this schema...
+  final JsonSchema? ifSchema;
+
+  /// From `then`: ...it must also validate against this schema.
+  final JsonSchema? thenSchema;
+
+  /// From `else`: ...otherwise, it must validate against this schema.
+  final JsonSchema? elseSchema;
+
+  /// From `allOf`: The instance must be valid against all of these schemas.
+  final List<JsonSchema>? allOf;
+
+  /// From `anyOf`: The instance must be valid against at least one of these schemas.
+  final List<JsonSchema>? anyOf;
+
+  /// From `oneOf`: The instance must be valid against exactly one of these schemas.
+  final List<JsonSchema>? oneOf;
+
+  /// From `not`: The instance must NOT be valid against this schema.
+  final JsonSchema? notSchema;
+
+  /// From `readOnly`: Indicates that the instance value should not be modified.
+  final bool? readOnly;
+
+  /// From `writeOnly`: Indicates the value is for writing only and should not be returned.
+  final bool? writeOnly;
+
+  JsonSchema({
+    this.schemaVersion,
+    this.id,
+    this.ref,
+    this.comment,
+    this.title,
+    this.description,
+    this.type,
+    this.enumValues,
+    this.constValue,
+    this.defaultValue,
+    this.examples,
+    this.definitions,
+    this.ifSchema,
+    this.thenSchema,
+    this.elseSchema,
+    this.allOf,
+    this.anyOf,
+    this.oneOf,
+    this.notSchema,
+    this.readOnly,
+    this.writeOnly,
+  }) {
+    _validateSchema();
   }
 
-  @override
-  String? get comment => _comment;
-
-  set comment(String? comment) {
-    _comment = comment;
-  }
-
-  @override
-  String? get title => _title;
-
-  set title(String? title) {
-    _title = title;
-  }
-
-  @override
-  String? get description => _description;
-
-  set description(String? description) {
-    _description = description;
-  }
-
-  @override
-  dynamic get defaultValue => _defaultValue;
-
-  set defaultValue(dynamic value) {
-    _validateDefaultValue(value);
-    _defaultValue = value;
-  }
-
-  /// Validates that the default value matches the schema constraints.
-  /// Throws a [FormatException] if the default value is invalid.
-  void _validateDefaultValue(dynamic value) {
-    if (value == null) {
-      return; // null is always valid as a default value
-    }
-
-    // Check against const value first (most restrictive)
-    if (_constValue != null) {
-      bool isEqual = _deepEquals(value, _constValue);
-      if (!isEqual) {
-        throw FormatException('default value must be equal to const value');
-      }
-      return; // If it matches const, no need to check other constraints
-    }
-
-    // Check against enum values
-    if (_enumValues != null) {
-      bool foundMatch = false;
-      for (var enumValue in _enumValues!) {
-        if (_deepEquals(value, enumValue)) {
-          foundMatch = true;
-          break;
-        }
-      }
-      if (!foundMatch) {
-        throw FormatException('default value must be one of the enum values');
-      }
-      return; // If it's in enum, no need to check other constraints
-    }
-
-    // Check type constraints
-    if (_type != null) {
-      _validateTypeConstraint(value, _type);
-    }
-
-    // Type-specific validations
-    if (value is num) {
-      _validateNumericConstraints(value);
-    } else if (value is String) {
-      _validateStringConstraints(value);
-    } else if (value is List) {
-      _validateArrayConstraints(value);
-    } else if (value is Map) {
-      _validateObjectConstraints(value);
+  /// Validates the schema and throws an exception if validation fails.
+  /// This method should be called by subclass constructors after initialization.
+  void _validateSchema() {
+    final errors = JsonSchemaValidator.validate(this);
+    if (errors.isNotEmpty) {
+      throw JsonSchemaValidationException(errors);
     }
   }
 
-  /// Validates that the value matches the type constraint.
-  void _validateTypeConstraint(dynamic value, dynamic typeConstraint) {
-    if (typeConstraint is JsonType) {
-      _validateSingleTypeConstraint(value, typeConstraint);
-    } else if (typeConstraint is List) {
-      bool validForAny = false;
-      for (var type in typeConstraint) {
-        try {
-          _validateSingleTypeConstraint(value, type);
-          validForAny = true;
-          break;
-        } catch (_) {
-          // Continue checking other types
-        }
-      }
-      if (!validForAny) {
-        throw FormatException(
-          'default value does not match any of the specified types',
-        );
+  /// Creates a JsonSchema instance from a JSON map.
+  /// This factory method will delegate to the correct subclass if specific keywords are found.
+  factory JsonSchema.fromJson(Map<String, dynamic> json) {
+    // Determine the type from the 'type' keyword or by inspecting other keywords.
+    final typeValue = json['type'];
+    JsonType? primaryType;
+    if (typeValue is String) {
+      primaryType = _parseJsonType(typeValue);
+    } else if (typeValue is List && typeValue.isNotEmpty) {
+      primaryType = _parseJsonType(typeValue.first);
+    }
+
+    // Heuristically determine type if not explicitly defined
+    if (primaryType == null) {
+      if (json.containsKey('properties') || json.containsKey('maxProperties')) {
+        primaryType = JsonType.object;
+      } else if (json.containsKey('items') || json.containsKey('maxItems')) {
+        primaryType = JsonType.array;
+      } else if (json.containsKey('maxLength') || json.containsKey('pattern')) {
+        primaryType = JsonType.string;
+      } else if (json.containsKey('multipleOf') ||
+          json.containsKey('maximum')) {
+        primaryType = JsonType.number;
       }
     }
-  }
 
-  /// Validates that the value matches a single type constraint.
-  void _validateSingleTypeConstraint(dynamic value, JsonType type) {
-    switch (type) {
-      case JsonType.string:
-        if (value is! String) {
-          throw FormatException('default value must be a string');
-        }
-        break;
-      case JsonType.number:
-        if (value is! num) {
-          throw FormatException('default value must be a number');
-        }
-        break;
-      case JsonType.integer:
-        if (value is! int &&
-            (value is! num || value.truncateToDouble() != value)) {
-          throw FormatException('default value must be an integer');
-        }
-        break;
+    switch (primaryType) {
       case JsonType.object:
-        if (value is! Map) {
-          throw FormatException('default value must be an object');
-        }
-        break;
+        return ObjectSchema.fromJson(json);
       case JsonType.array:
-        if (value is! List) {
-          throw FormatException('default value must be an array');
+        return ArraySchema.fromJson(json);
+      case JsonType.string:
+        return StringSchema.fromJson(json);
+      case JsonType.number:
+      case JsonType.integer:
+        return NumberSchema.fromJson(json);
+      default:
+        return JsonSchema._fromJson(json);
+    }
+  }
+
+  /// Internal fromJson constructor used by the factory and subclasses.
+  JsonSchema._fromJson(Map<String, dynamic> json)
+    : schemaVersion = json.containsKey(r'$schema')
+          ? Uri.parse(json[r'$schema'])
+          : null,
+      id = json.containsKey(r'$id') ? Uri.parse(json[r'$id']) : null,
+      ref = json.containsKey(r'$ref') ? Uri.parse(json[r'$ref']) : null,
+      comment = json[r'$comment'],
+      title = json['title'],
+      description = json['description'],
+      type = json.containsKey('type')
+          ? (json['type'] is List
+                ? (json['type'] as List).map((t) => _parseJsonType(t)).toList()
+                : [_parseJsonType(json['type'])])
+          : null,
+      enumValues = json['enum'],
+      constValue = json['const'],
+      defaultValue = json['default'],
+      examples = json['examples'],
+      definitions = json.containsKey('definitions')
+          ? (json['definitions'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, JsonSchema.fromJson(value)),
+            )
+          : null,
+      ifSchema = json.containsKey('if')
+          ? JsonSchema.fromJson(json['if'])
+          : null,
+      thenSchema = json.containsKey('then')
+          ? JsonSchema.fromJson(json['then'])
+          : null,
+      elseSchema = json.containsKey('else')
+          ? JsonSchema.fromJson(json['else'])
+          : null,
+      allOf = json.containsKey('allOf')
+          ? (json['allOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          : null,
+      anyOf = json.containsKey('anyOf')
+          ? (json['anyOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          : null,
+      oneOf = json.containsKey('oneOf')
+          ? (json['oneOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          : null,
+      notSchema = json.containsKey('not')
+          ? JsonSchema.fromJson(json['not'])
+          : null,
+      readOnly = json['readOnly'],
+      writeOnly = json['writeOnly'];
+
+  static JsonType _parseJsonType(String typeString) {
+    return JsonType.byTypeValue(typeString);
+  }
+
+  static String _jsonTypeToString(JsonType jsonType) {
+    return jsonType.typeValue;
+  }
+
+  /// Converts this JsonSchema instance to a JSON map.
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    if (schemaVersion != null) json[r'$schema'] = schemaVersion.toString();
+    if (id != null) json[r'$id'] = id.toString();
+    if (ref != null) json[r'$ref'] = ref.toString();
+    if (comment != null) json[r'$comment'] = comment;
+    if (title != null) json['title'] = title;
+    if (description != null) json['description'] = description;
+    if (type != null) {
+      if (type!.length == 1) {
+        json['type'] = _jsonTypeToString(type!.first);
+      } else {
+        json['type'] = type!.map(_jsonTypeToString).toList();
+      }
+    }
+    if (enumValues != null) json['enum'] = enumValues;
+    if (constValue != null) json['const'] = constValue;
+    if (defaultValue != null) json['default'] = defaultValue;
+    if (examples != null) json['examples'] = examples;
+    if (definitions != null) {
+      json['definitions'] = definitions!.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      );
+    }
+    if (ifSchema != null) json['if'] = ifSchema!.toJson();
+    if (thenSchema != null) json['then'] = thenSchema!.toJson();
+    if (elseSchema != null) json['else'] = elseSchema!.toJson();
+    if (allOf != null) json['allOf'] = allOf!.map((s) => s.toJson()).toList();
+    if (anyOf != null) json['anyOf'] = anyOf!.map((s) => s.toJson()).toList();
+    if (oneOf != null) json['oneOf'] = oneOf!.map((s) => s.toJson()).toList();
+    if (notSchema != null) json['not'] = notSchema!.toJson();
+    if (readOnly != null) json['readOnly'] = readOnly;
+    if (writeOnly != null) json['writeOnly'] = writeOnly;
+    return json;
+  }
+}
+
+/// Represents a JSON Schema for an `object` type.
+class ObjectSchema extends JsonSchema {
+  /// From `maxProperties`: The maximum number of properties allowed.
+  final int? maxProperties;
+
+  /// From `minProperties`: The minimum number of properties required.
+  final int? minProperties;
+
+  /// From `required`: A list of property names that must be present.
+  final List<String>? required;
+
+  /// From `properties`: Schemas for specific properties.
+  final Map<String, JsonSchema>? properties;
+
+  /// From `patternProperties`: Schemas for properties matching a regex pattern.
+  final Map<String, JsonSchema>? patternProperties;
+
+  /// From `additionalProperties`: Schema for properties not covered by `properties` or `patternProperties`.
+  final JsonSchema? additionalProperties;
+
+  /// From `dependencies`: Property-based dependencies.
+  final Map<String, dynamic>? dependencies;
+
+  /// From `propertyNames`: A schema that all property names must validate against.
+  final JsonSchema? propertyNames;
+
+  ObjectSchema({
+    super.schemaVersion,
+    super.id,
+    super.ref,
+    super.comment,
+    super.title,
+    super.description,
+    super.type,
+    super.enumValues,
+    super.constValue,
+    super.defaultValue,
+    super.examples,
+    super.definitions,
+    super.ifSchema,
+    super.thenSchema,
+    super.elseSchema,
+    super.allOf,
+    super.anyOf,
+    super.oneOf,
+    super.notSchema,
+    super.readOnly,
+    super.writeOnly,
+    this.maxProperties,
+    this.minProperties,
+    this.required,
+    this.properties,
+    this.patternProperties,
+    this.additionalProperties,
+    this.dependencies,
+    this.propertyNames,
+  }) {
+    _validateSchema();
+  }
+
+  /// Creates an ObjectSchema from a JSON map.
+  factory ObjectSchema.fromJson(Map<String, dynamic> json) {
+    return ObjectSchema._fromJson(json);
+  }
+
+  ObjectSchema._fromJson(super.json)
+    : maxProperties = json['maxProperties'],
+      minProperties = json['minProperties'],
+      required = json.containsKey('required')
+          ? List<String>.from(json['required'])
+          : null,
+      properties = json.containsKey('properties')
+          ? (json['properties'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, JsonSchema.fromJson(value)),
+            )
+          : null,
+      patternProperties = json.containsKey('patternProperties')
+          ? (json['patternProperties'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, JsonSchema.fromJson(value)),
+            )
+          : null,
+      additionalProperties = json.containsKey('additionalProperties')
+          ? JsonSchema.fromJson(json['additionalProperties'])
+          : null,
+      dependencies = json.containsKey('dependencies')
+          ? (json['dependencies'] as Map<String, dynamic>).map((key, value) {
+              if (value is Map<String, dynamic>) {
+                return MapEntry(key, JsonSchema.fromJson(value));
+              }
+              return MapEntry(key, List<String>.from(value));
+            })
+          : null,
+      propertyNames = json.containsKey('propertyNames')
+          ? JsonSchema.fromJson(json['propertyNames'])
+          : null,
+      super._fromJson();
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    if (maxProperties != null) json['maxProperties'] = maxProperties;
+    if (minProperties != null) json['minProperties'] = minProperties;
+    if (required != null) json['required'] = required;
+    if (properties != null) {
+      json['properties'] = properties!.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      );
+    }
+    if (patternProperties != null) {
+      json['patternProperties'] = patternProperties!.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      );
+    }
+    if (additionalProperties != null) {
+      json['additionalProperties'] = additionalProperties!.toJson();
+    }
+    if (dependencies != null) {
+      json['dependencies'] = dependencies!.map((key, value) {
+        if (value is JsonSchema) {
+          return MapEntry(key, value.toJson());
         }
-        break;
-      case JsonType.boolean:
-        if (value is! bool) {
-          throw FormatException('default value must be a boolean');
-        }
-        break;
-      case JsonType.nullValue:
-        if (value != null) {
-          throw FormatException('default value must be null');
-        }
-        break;
+        return MapEntry(key, value);
+      });
     }
+    if (propertyNames != null) json['propertyNames'] = propertyNames!.toJson();
+    return json;
+  }
+}
+
+/// Represents a JSON Schema for an `array` type.
+class ArraySchema extends JsonSchema {
+  /// From `items`: Schema for array items. Can be a single schema or a list of schemas.
+  final dynamic items; // JsonSchema or List<JsonSchema>
+
+  /// From `additionalItems`: Schema for extra items when `items` is a list.
+  final JsonSchema? additionalItems;
+
+  /// From `maxItems`: The maximum number of items in the array.
+  final int? maxItems;
+
+  /// From `minItems`: The minimum number of items in the array.
+  final int? minItems;
+
+  /// From `uniqueItems`: If true, all items in the array must be unique.
+  final bool? uniqueItems;
+
+  /// From `contains`: At least one item in the array must be valid against this schema.
+  final JsonSchema? contains;
+
+  ArraySchema({
+    super.schemaVersion,
+    super.id,
+    super.ref,
+    super.comment,
+    super.title,
+    super.description,
+    super.type,
+    super.enumValues,
+    super.constValue,
+    super.defaultValue,
+    super.examples,
+    super.definitions,
+    super.ifSchema,
+    super.thenSchema,
+    super.elseSchema,
+    super.allOf,
+    super.anyOf,
+    super.oneOf,
+    super.notSchema,
+    super.readOnly,
+    super.writeOnly,
+    this.items,
+    this.additionalItems,
+    this.maxItems,
+    this.minItems,
+    this.uniqueItems,
+    this.contains,
+  }) {
+    _validateSchema();
   }
 
-  /// Validates numeric constraints for a number value.
-  void _validateNumericConstraints(num value) {
-    // Check minimum before maximum (logical order)
-    if (_minimum != null) {
-      if (value < _minimum!) {
-        throw FormatException(
-          'default value must be greater than or equal to minimum ($minimum)',
-        );
+  /// Creates an ArraySchema from a JSON map.
+  factory ArraySchema.fromJson(Map<String, dynamic> json) {
+    return ArraySchema._fromJson(json);
+  }
+
+  ArraySchema._fromJson(super.json)
+    : items = json.containsKey('items')
+          ? (json['items'] is List
+                ? (json['items'] as List)
+                      .map((i) => JsonSchema.fromJson(i))
+                      .toList()
+                : JsonSchema.fromJson(json['items']))
+          : null,
+      additionalItems = json.containsKey('additionalItems')
+          ? JsonSchema.fromJson(json['additionalItems'])
+          : null,
+      maxItems = json['maxItems'],
+      minItems = json['minItems'],
+      uniqueItems = json['uniqueItems'],
+      contains = json.containsKey('contains')
+          ? JsonSchema.fromJson(json['contains'])
+          : null,
+      super._fromJson();
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    if (items != null) {
+      if (items is JsonSchema) {
+        json['items'] = (items as JsonSchema).toJson();
+      } else {
+        json['items'] = (items as List<JsonSchema>)
+            .map((s) => s.toJson())
+            .toList();
       }
     }
-
-    if (_exclusiveMinimum != null) {
-      if (value <= _exclusiveMinimum!) {
-        throw FormatException(
-          'default value must be greater than exclusive minimum ($exclusiveMinimum)',
-        );
-      }
+    if (additionalItems != null) {
+      json['additionalItems'] = additionalItems!.toJson();
     }
+    if (maxItems != null) json['maxItems'] = maxItems;
+    if (minItems != null) json['minItems'] = minItems;
+    if (uniqueItems != null) json['uniqueItems'] = uniqueItems;
+    if (contains != null) json['contains'] = contains!.toJson();
+    return json;
+  }
+}
 
-    if (_maximum != null) {
-      if (value > _maximum!) {
-        throw FormatException(
-          'default value must be less than or equal to maximum ($maximum)',
-        );
-      }
+/// Represents a JSON Schema for a `string` type.
+class StringSchema extends JsonSchema {
+  /// From `maxLength`: The maximum length of the string.
+  final int? maxLength;
+
+  /// From `minLength`: The minimum length of the string.
+  final int? minLength;
+
+  /// From `pattern`: A regex pattern the string must match.
+  final String? pattern;
+
+  /// From `format`: The semantic format of the string (e.g., 'date-time', 'email').
+  final StringFormat? format;
+
+  /// From `contentEncoding`: The encoding of the string's content (e.g., 'base64').
+  final String? contentEncoding;
+
+  /// From `contentMediaType`: The media type of the string's content (e.g., 'image/png').
+  final String? contentMediaType;
+
+  StringSchema({
+    super.schemaVersion,
+    super.id,
+    super.ref,
+    super.comment,
+    super.title,
+    super.description,
+    super.type,
+    super.enumValues,
+    super.constValue,
+    super.defaultValue,
+    super.examples,
+    super.definitions,
+    super.ifSchema,
+    super.thenSchema,
+    super.elseSchema,
+    super.allOf,
+    super.anyOf,
+    super.oneOf,
+    super.notSchema,
+    super.readOnly,
+    super.writeOnly,
+    this.maxLength,
+    this.minLength,
+    this.pattern,
+    this.format,
+    this.contentEncoding,
+    this.contentMediaType,
+  }) {
+    _validateSchema();
+  }
+
+  /// Creates a StringSchema from a JSON map.
+  factory StringSchema.fromJson(Map<String, dynamic> json) {
+    return StringSchema._fromJson(json);
+  }
+
+  StringSchema._fromJson(super.json)
+    : maxLength = json['maxLength'],
+      minLength = json['minLength'],
+      pattern = json['pattern'],
+      format = json.containsKey('format')
+          ? StringFormat.byTypeValue(json['format'])
+          : null,
+      contentEncoding = json['contentEncoding'],
+      contentMediaType = json['contentMediaType'],
+      super._fromJson();
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    if (maxLength != null) json['maxLength'] = maxLength;
+    if (minLength != null) json['minLength'] = minLength;
+    if (pattern != null) json['pattern'] = pattern;
+    if (format != null) {
+      json['format'] = format!.formatValue.replaceAllMapped(
+        RegExp(r'([A-Z])'),
+        (match) => '-${match.group(1)!.toLowerCase()}',
+      );
     }
+    if (contentEncoding != null) json['contentEncoding'] = contentEncoding;
+    if (contentMediaType != null) json['contentMediaType'] = contentMediaType;
+    return json;
+  }
+}
 
-    if (_exclusiveMaximum != null) {
-      if (value >= _exclusiveMaximum!) {
-        throw FormatException(
-          'default value must be less than exclusive maximum ($exclusiveMaximum)',
-        );
-      }
-    }
+/// Represents a JSON Schema for a `number` or `integer` type.
+class NumberSchema extends JsonSchema {
+  /// From `multipleOf`: The number must be a multiple of this value.
+  final num? multipleOf;
 
-    if (_multipleOf != null) {
-      // Check if value is a multiple of multipleOf
-      if ((value / _multipleOf!).truncateToDouble() != value / _multipleOf!) {
-        throw FormatException(
-          'default value must be a multiple of $multipleOf',
-        );
-      }
-    }
+  /// From `maximum`: The inclusive maximum value.
+  final num? maximum;
+
+  /// From `exclusiveMaximum`: The exclusive maximum value.
+  final num? exclusiveMaximum;
+
+  /// From `minimum`: The inclusive minimum value.
+  final num? minimum;
+
+  /// From `exclusiveMinimum`: The exclusive minimum value.
+  final num? exclusiveMinimum;
+
+  NumberSchema({
+    super.schemaVersion,
+    super.id,
+    super.ref,
+    super.comment,
+    super.title,
+    super.description,
+    super.type,
+    super.enumValues,
+    super.constValue,
+    super.defaultValue,
+    super.examples,
+    super.definitions,
+    super.ifSchema,
+    super.thenSchema,
+    super.elseSchema,
+    super.allOf,
+    super.anyOf,
+    super.oneOf,
+    super.notSchema,
+    super.readOnly,
+    super.writeOnly,
+    this.multipleOf,
+    this.maximum,
+    this.exclusiveMaximum,
+    this.minimum,
+    this.exclusiveMinimum,
+  }) {
+    _validateSchema();
   }
 
-  /// Validates string constraints for a string value.
-  void _validateStringConstraints(String value) {
-    // Check minLength before maxLength (logical order)
-    if (_minLength != null) {
-      if (value.length < _minLength!) {
-        throw FormatException(
-          'default value length must be at least $minLength',
-        );
-      }
-    }
-
-    if (_maxLength != null) {
-      if (value.length > _maxLength!) {
-        throw FormatException(
-          'default value length must not exceed $maxLength',
-        );
-      }
-    }
-
-    if (_pattern != null) {
-      RegExp regex = RegExp(_pattern!);
-      if (!regex.hasMatch(value)) {
-        throw FormatException(
-          'default value must match the pattern: $_pattern',
-        );
-      }
-    }
+  /// Creates a NumberSchema from a JSON map.
+  factory NumberSchema.fromJson(Map<String, dynamic> json) {
+    return NumberSchema._fromJson(json);
   }
 
-  /// Validates array constraints for a list value.
-  void _validateArrayConstraints(List value) {
-    // Check minItems before maxItems (logical order)
-    if (_minItems != null) {
-      if (value.length < _minItems!) {
-        throw FormatException(
-          'default value array must have at least $_minItems items',
-        );
-      }
-    }
-
-    if (_maxItems != null) {
-      if (value.length > _maxItems!) {
-        throw FormatException(
-          'default value array must not have more than $_maxItems items',
-        );
-      }
-    }
-
-    if (_uniqueItems == true) {
-      // Check for duplicate items
-      Set uniqueItems = {};
-      for (var item in value) {
-        String serialized = json.encode(item);
-        if (uniqueItems.contains(serialized)) {
-          throw FormatException('default value array must have unique items');
-        }
-        uniqueItems.add(serialized);
-      }
-    }
-
-    // TODO: Add validation for items, additionalItems, and contains if needed
-  }
-
-  /// Validates object constraints for a map value.
-  void _validateObjectConstraints(Map value) {
-    // Check minProperties before maxProperties (logical order)
-    if (_minProperties != null) {
-      if (value.length < _minProperties!) {
-        throw FormatException(
-          'default value object must have at least $_minProperties properties',
-        );
-      }
-    }
-
-    if (_maxProperties != null) {
-      if (value.length > _maxProperties!) {
-        throw FormatException(
-          'default value object must not have more than $_maxProperties properties',
-        );
-      }
-    }
-
-    if (_required != null) {
-      for (var propName in _required!) {
-        if (!value.containsKey(propName)) {
-          throw FormatException(
-            'default value object must have required property: $propName',
-          );
-        }
-      }
-    }
-
-    // TODO: Add validation for properties, patternProperties, additionalProperties if needed
-  }
-
-  /// Deep equality check for JSON values.
-  bool _deepEquals(dynamic a, dynamic b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-
-    if (a is List && b is List) {
-      if (a.length != b.length) return false;
-      for (int i = 0; i < a.length; i++) {
-        if (!_deepEquals(a[i], b[i])) return false;
-      }
-      return true;
-    } else if (a is Map && b is Map) {
-      if (a.length != b.length) return false;
-      for (var key in a.keys) {
-        if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) return false;
-      }
-      return true;
-    } else {
-      return a == b;
-    }
-  }
+  NumberSchema._fromJson(super.json)
+    : multipleOf = json['multipleOf'],
+      maximum = json['maximum'],
+      exclusiveMaximum = json['exclusiveMaximum'],
+      minimum = json['minimum'],
+      exclusiveMinimum = json['exclusiveMinimum'],
+      super._fromJson();
 
   @override
-  List<dynamic>? get examples => _examples;
-
-  set examples(List<dynamic>? examples) {
-    _examples = examples;
-  }
-
-  @override
-  bool? get readOnly => _readOnly;
-
-  set readOnly(bool? value) {
-    _readOnly = value;
-  }
-
-  @override
-  bool? get writeOnly => _writeOnly;
-
-  set writeOnly(bool? value) {
-    _writeOnly = value;
-  }
-
-  @override
-  dynamic get type => _type;
-
-  set type(dynamic value) {
-    _type = value;
-  }
-
-  @override
-  List<dynamic>? get enumValues => _enumValues;
-
-  set enumValues(List<dynamic>? values) {
-    if (values != null && values.isEmpty) {
-      throw FormatException('enum must have at least one value');
-    }
-    _enumValues = values;
-  }
-
-  @override
-  dynamic get constValue => _constValue;
-
-  set constValue(dynamic value) {
-    _constValue = value;
-  }
-
-  @override
-  num? get multipleOf => _multipleOf;
-
-  set multipleOf(num? value) {
-    if (value != null && value <= 0) {
-      throw FormatException('multipleOf must be greater than 0');
-    }
-    _multipleOf = value;
-  }
-
-  @override
-  num? get maximum => _maximum;
-
-  set maximum(num? value) {
-    _maximum = value;
-  }
-
-  @override
-  num? get exclusiveMaximum => _exclusiveMaximum;
-
-  set exclusiveMaximum(num? value) {
-    _exclusiveMaximum = value;
-  }
-
-  @override
-  num? get minimum => _minimum;
-
-  set minimum(num? value) {
-    _minimum = value;
-  }
-
-  @override
-  num? get exclusiveMinimum => _exclusiveMinimum;
-
-  set exclusiveMinimum(num? value) {
-    _exclusiveMinimum = value;
-  }
-
-  @override
-  String? get schema => _schema;
-
-  set schema(String? value) {
-    _schema = value;
-  }
-
-  @override
-  String? get ref => _ref;
-
-  set ref(String? value) {
-    if (value == null || value.isEmpty) {
-      _ref = null;
-      return;
-    }
-    _ref = Uri.parse(value).toString();
-  }
-
-  @override
-  int? get maxLength => _maxLength;
-
-  set maxLength(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('maxLength must be a non-negative integer');
-    }
-    _maxLength = value;
-  }
-
-  @override
-  int? get minLength => _minLength;
-
-  set minLength(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('minLength must be a non-negative integer');
-    }
-    _minLength = value;
-  }
-
-  @override
-  String? get pattern => _pattern;
-
-  set pattern(String? value) {
-    if (value != null) {
-      try {
-        RegExp(value);
-      } catch (e) {
-        throw FormatException('pattern must be a valid regular expression: $e');
-      }
-    }
-    _pattern = value;
-  }
-
-  @override
-  dynamic get items => _items;
-
-  set items(dynamic value) {
-    _items = value;
-  }
-
-  @override
-  dynamic get additionalItems => _additionalItems;
-
-  set additionalItems(dynamic value) {
-    _additionalItems = value;
-  }
-
-  @override
-  int? get maxItems => _maxItems;
-
-  set maxItems(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('maxItems must be a non-negative integer');
-    }
-    _maxItems = value;
-  }
-
-  @override
-  int? get minItems => _minItems;
-
-  set minItems(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('minItems must be a non-negative integer');
-    }
-    _minItems = value;
-  }
-
-  @override
-  bool? get uniqueItems => _uniqueItems;
-
-  set uniqueItems(bool? value) {
-    _uniqueItems = value;
-  }
-
-  @override
-  JsonSchemaBase? get contains => _contains;
-
-  set contains(JsonSchemaBase? value) {
-    _contains = value;
-  }
-
-  @override
-  int? get maxProperties => _maxProperties;
-
-  set maxProperties(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('maxProperties must be a non-negative integer');
-    }
-    _maxProperties = value;
-  }
-
-  @override
-  int? get minProperties => _minProperties;
-
-  set minProperties(int? value) {
-    if (value != null && value < 0) {
-      throw FormatException('minProperties must be a non-negative integer');
-    }
-    _minProperties = value;
-  }
-
-  @override
-  List<String>? get required => _required;
-
-  set required(List<String>? value) {
-    if (value != null && value.isEmpty) {
-      throw FormatException('required must not be an empty array');
-    }
-    _required = value;
-  }
-
-  @override
-  Map<String, JsonSchemaBase>? get properties => _properties;
-
-  set properties(Map<String, JsonSchemaBase>? value) {
-    _properties = value;
-  }
-
-  @override
-  Map<String, JsonSchemaBase>? get patternProperties => _patternProperties;
-
-  set patternProperties(Map<String, JsonSchemaBase>? value) {
-    if (value != null) {
-      // Validate that all keys are valid regex patterns
-      for (final pattern in value.keys) {
-        try {
-          RegExp(pattern);
-        } catch (e) {
-          throw FormatException(
-            'patternProperties key must be a valid regular expression: $e',
-          );
-        }
-      }
-    }
-    _patternProperties = value;
-  }
-
-  @override
-  dynamic get additionalProperties => _additionalProperties;
-
-  set additionalProperties(dynamic value) {
-    _additionalProperties = value;
-  }
-
-  @override
-  Map<String, dynamic>? get dependencies => _dependencies;
-
-  set dependencies(Map<String, dynamic>? value) {
-    _dependencies = value;
-  }
-
-  @override
-  JsonSchemaBase? get propertyNames => _propertyNames;
-
-  set propertyNames(JsonSchemaBase? value) {
-    _propertyNames = value;
-  }
-
-  @override
-  Map<String, JsonSchemaBase>? get definitions => _definitions;
-
-  set definitions(Map<String, JsonSchemaBase>? value) {
-    _definitions = value;
-  }
-
-  @override
-  List<JsonSchemaBase>? get allOf => _allOf;
-
-  set allOf(List<JsonSchemaBase>? value) {
-    if (value != null && value.isEmpty) {
-      throw FormatException('allOf must not be an empty array');
-    }
-    _allOf = value;
-  }
-
-  @override
-  List<JsonSchemaBase>? get anyOf => _anyOf;
-
-  set anyOf(List<JsonSchemaBase>? value) {
-    if (value != null && value.isEmpty) {
-      throw FormatException('anyOf must not be an empty array');
-    }
-    _anyOf = value;
-  }
-
-  @override
-  List<JsonSchemaBase>? get oneOf => _oneOf;
-
-  set oneOf(List<JsonSchemaBase>? value) {
-    if (value != null && value.isEmpty) {
-      throw FormatException('oneOf must not be an empty array');
-    }
-    _oneOf = value;
-  }
-
-  @override
-  JsonSchemaBase? get not => _not;
-
-  set not(JsonSchemaBase? value) {
-    _not = value;
-  }
-
-  @override
-  JsonSchemaBase? get ifSchema => _ifSchema;
-
-  set ifSchema(JsonSchemaBase? value) {
-    _ifSchema = value;
-  }
-
-  @override
-  JsonSchemaBase? get thenSchema => _thenSchema;
-
-  set thenSchema(JsonSchemaBase? value) {
-    _thenSchema = value;
-  }
-
-  @override
-  JsonSchemaBase? get elseSchema => _elseSchema;
-
-  set elseSchema(JsonSchemaBase? value) {
-    _elseSchema = value;
-  }
-
-  @override
-  String? get format => _format;
-
-  set format(String? value) {
-    _format = value;
-  }
-
-  @override
-  String? get contentMediaType => _contentMediaType;
-
-  set contentMediaType(String? value) {
-    _contentMediaType = value;
-  }
-
-  @override
-  String? get contentEncoding => _contentEncoding;
-
-  set contentEncoding(String? value) {
-    _contentEncoding = value;
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    if (multipleOf != null) json['multipleOf'] = multipleOf;
+    if (maximum != null) json['maximum'] = maximum;
+    if (exclusiveMaximum != null) json['exclusiveMaximum'] = exclusiveMaximum;
+    if (minimum != null) json['minimum'] = minimum;
+    if (exclusiveMinimum != null) json['exclusiveMinimum'] = exclusiveMinimum;
+    return json;
   }
 }

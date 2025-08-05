@@ -1,9 +1,8 @@
 /// JSONSchema Utils
 ///
+/// A library for working with JSON Schema documents.
 library;
 
-export 'src/json_schema.dart' show JsonSchema;
-export 'src/json_schema_document.dart' show JsonSchemaDocument;
-export 'src/json_type.dart' show JsonType;
-export 'src/json_schema_types.dart';
-export 'src/validation_error.dart' show ValidationError, ValidationResult;
+export 'src/json_schema.dart';
+export 'src/json_type_enum.dart';
+export 'src/string_format_enum.dart';

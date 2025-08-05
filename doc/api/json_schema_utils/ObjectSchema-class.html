@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the ObjectSchema class from the json_schema_utils library, for the Dart programming language.">
+  <title>ObjectSchema class - json_schema_utils library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">json_schema_utils</a></li>
+    <li><a href="../json_schema_utils/">json_schema_utils.dart</a></li>
+    <li class="self-crumb">ObjectSchema class</li>
+  </ol>
+  <div class="self-name">ObjectSchema</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="json_schema_utils&#47;json_schema_utils-library-sidebar.html"
+    data-below-sidebar="json_schema_utils&#47;ObjectSchema-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">ObjectSchema</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Represents a JSON Schema for an <code>object</code> type.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></li>
+      <li>ObjectSchema</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+        
+        
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="ObjectSchema.new" class="callable">
+          <span class="name"><a href="../json_schema_utils/ObjectSchema/ObjectSchema.html">ObjectSchema.new</a></span><span class="signature">({<span class="parameter" id="-param-schemaVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span> <span class="parameter-name">schemaVersion</span>, </span><span class="parameter" id="-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span> <span class="parameter-name">id</span>, </span><span class="parameter" id="-param-ref"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="-param-comment"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">comment</span>, </span><span class="parameter" id="-param-title"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">title</span>, </span><span class="parameter" id="-param-description"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">description</span>, </span><span class="parameter" id="-param-type"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonType.html">JsonType</a></span>&gt;</span>?</span> <span class="parameter-name">type</span>, </span><span class="parameter" id="-param-enumValues"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span> <span class="parameter-name">enumValues</span>, </span><span class="parameter" id="-param-constValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">constValue</span>, </span><span class="parameter" id="-param-defaultValue"><span class="type-annotation">dynamic</span> <span class="parameter-name">defaultValue</span>, </span><span class="parameter" id="-param-examples"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span> <span class="parameter-name">examples</span>, </span><span class="parameter" id="-param-definitions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">definitions</span>, </span><span class="parameter" id="-param-ifSchema"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">ifSchema</span>, </span><span class="parameter" id="-param-thenSchema"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">thenSchema</span>, </span><span class="parameter" id="-param-elseSchema"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">elseSchema</span>, </span><span class="parameter" id="-param-allOf"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">allOf</span>, </span><span class="parameter" id="-param-anyOf"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">anyOf</span>, </span><span class="parameter" id="-param-oneOf"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">oneOf</span>, </span><span class="parameter" id="-param-notSchema"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">notSchema</span>, </span><span class="parameter" id="-param-readOnly"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">readOnly</span>, </span><span class="parameter" id="-param-writeOnly"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">writeOnly</span>, </span><span class="parameter" id="-param-maxProperties"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">maxProperties</span>, </span><span class="parameter" id="-param-minProperties"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">minProperties</span>, </span><span class="parameter" id="-param-required"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">required</span>, </span><span class="parameter" id="-param-properties"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">properties</span>, </span><span class="parameter" id="-param-patternProperties"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span> <span class="parameter-name">patternProperties</span>, </span><span class="parameter" id="-param-additionalProperties"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">additionalProperties</span>, </span><span class="parameter" id="-param-dependencies"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span> <span class="parameter-name">dependencies</span>, </span><span class="parameter" id="-param-propertyNames"><span class="type-annotation"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span> <span class="parameter-name">propertyNames</span></span>})</span>
+        </dt>
+        <dd>
+          
+        </dd>
+        <dt id="ObjectSchema.fromJson" class="callable">
+          <span class="name"><a href="../json_schema_utils/ObjectSchema/ObjectSchema.fromJson.html">ObjectSchema.fromJson</a></span><span class="signature">(<span class="parameter" id="fromJson-param-json"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">json</span></span>)</span>
+        </dt>
+        <dd>
+          Creates an ObjectSchema from a JSON map.
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="additionalProperties" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/additionalProperties.html">additionalProperties</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd>
+  From <code>additionalProperties</code>: Schema for properties not covered by <code>properties</code> or <code>patternProperties</code>.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="allOf" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/allOf.html">allOf</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>allOf</code>: The instance must be valid against all of these schemas.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="anyOf" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/anyOf.html">anyOf</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>anyOf</code>: The instance must be valid against at least one of these schemas.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="comment" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/comment.html">comment</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>$comment</code>: A comment for schema authors. Ignored by validators.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="constValue" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/constValue.html">constValue</a></span>
+  <span class="signature">&#8594; dynamic</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>const</code>: The exact value the instance must have.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="defaultValue" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/defaultValue.html">defaultValue</a></span>
+  <span class="signature">&#8594; dynamic</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>default</code>: A default value for the instance.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="definitions" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/definitions.html">definitions</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>definitions</code>: A location for defining reusable subschemas.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="dependencies" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/dependencies.html">dependencies</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span>
+  
+
+</dt>
+<dd>
+  From <code>dependencies</code>: Property-based dependencies.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="description" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/description.html">description</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>description</code>: A more detailed explanation of the schema's purpose.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="elseSchema" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/elseSchema.html">elseSchema</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>else</code>: ...otherwise, it must validate against this schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="enumValues" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/enumValues.html">enumValues</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>enum</code>: A fixed set of allowed values for the instance.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="examples" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/examples.html">examples</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>examples</code>: An array of example values that are valid against the schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="id" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/id.html">id</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>$id</code>: A URI for the schema, used for identification and resolution.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ifSchema" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/ifSchema.html">ifSchema</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>if</code>: If the instance validates against this schema...
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="maxProperties" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/maxProperties.html">maxProperties</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>
+  
+
+</dt>
+<dd>
+  From <code>maxProperties</code>: The maximum number of properties allowed.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="minProperties" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/minProperties.html">minProperties</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>
+  
+
+</dt>
+<dd>
+  From <code>minProperties</code>: The minimum number of properties required.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="notSchema" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/notSchema.html">notSchema</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>not</code>: The instance must NOT be valid against this schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="oneOf" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/oneOf.html">oneOf</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>oneOf</code>: The instance must be valid against exactly one of these schemas.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="patternProperties" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/patternProperties.html">patternProperties</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd>
+  From <code>patternProperties</code>: Schemas for properties matching a regex pattern.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="properties" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/properties.html">properties</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd>
+  From <code>properties</code>: Schemas for specific properties.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="propertyNames" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/propertyNames.html">propertyNames</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd>
+  From <code>propertyNames</code>: A schema that all property names must validate against.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="readOnly" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/readOnly.html">readOnly</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>readOnly</code>: Indicates that the instance value should not be modified.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ref" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/ref.html">ref</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>$ref</code>: A URI reference to another schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="required" class="property">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/required.html">required</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd>
+  From <code>required</code>: A list of property names that must be present.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="schemaVersion" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/schemaVersion.html">schemaVersion</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>$schema</code>: The URI identifying the dialect of the schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="thenSchema" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/thenSchema.html">thenSchema</a></span>
+  <span class="signature">&#8594; <a href="../json_schema_utils/JsonSchema-class.html">JsonSchema</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>then</code>: ...it must also validate against this schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="title" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/title.html">title</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>title</code>: A short, descriptive title for the schema.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="type" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/type.html">type</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../json_schema_utils/JsonType.html">JsonType</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>type</code>: The required primitive type(s) for the instance.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="writeOnly" class="property inherited">
+  <span class="name"><a href="../json_schema_utils/JsonSchema/writeOnly.html">writeOnly</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  From <code>writeOnly</code>: Indicates the value is for writing only and should not be returned.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toJson" class="callable">
+  <span class="name"><a href="../json_schema_utils/ObjectSchema/toJson.html">toJson</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts this JsonSchema instance to a JSON map.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">json_schema_utils</a></li>
+    <li><a href="../json_schema_utils/">json_schema_utils</a></li>
+    <li class="self-crumb">ObjectSchema class</li>
+</ol>
+
+    <h5>json_schema_utils library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    json_schema_utils
+      1.0.0-dev.13
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

@@ -14,12 +14,15 @@ Compatible with all Dart environments, including Flutter (Web, Mobile and Deskto
 ## Features
 
  - JSONSchema Support
- - Opinionated JSONSchema Document for compatibility with external $ref and schema registries
+ - Opinionated Root JSONSchema Document for compatibility with external $ref and schema registries
    - Required $schema (Currently only supports [JSON Schema Draft 7](https://json-schema.org/draft-07))
    - Required $id
    - Required title
    - Required description
- - Validation of spec / schema compliance while building examples
+ - Validation of JSON Schema properties according to the Draft-07 specification
+   - Validates that properties set in JsonSchema objects are valid
+   - Throws exceptions with detailed error messages when validation fails
+   - Validates nested schemas recursively
 
 ## Planned Features
 
@@ -34,58 +37,129 @@ Compatible with all Dart environments, including Flutter (Web, Mobile and Deskto
 
 ## Usage
 
+### Creating JSON Schemas
+
 ```dart
-class Example {
-   Example() {
-      try {
-         var schema = JsonSchemaDocument(
-            "https://indiealexh.dev/schema/vehicle",
-            "Vehicle Schema",
-            "A Schema to describe a vehicle",
-         );
-         schema
-            ..comment = "This is a comment"
-            ..defaultValue = {"type": "sedan"}
-            ..examples = [
-               {"type": "sedan"},
-               {"type": "suv"},
-            ]
-            ..readOnly = true
-            ..writeOnly = false;
-      } catch (e) {
-         print('Error: $e');
-      }
+// Create a simple person schema
+void createPersonSchema() {
+  try {
+    // Create a schema for a person object
+    var personSchema = ObjectSchema(
+      title: "Person Schema",
+      description: "A schema for a person object",
+      type: [JsonType.object],
+      required: ["name", "email", "age"],
+      properties: {
+        "name": StringSchema(
+          description: "The person's full name",
+          minLength: 2,
+          maxLength: 100,
+        ),
+        "email": StringSchema(
+          description: "The person's email address",
+          format: StringFormat.email,
+          pattern: r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+        ),
+        "age": NumberSchema(
+          description: "The person's age in years",
+          type: [JsonType.integer],
+          minimum: 0,
+          maximum: 120,
+        ),
+        "address": ObjectSchema(
+          description: "The person's address",
+          required: ["street", "city"],
+          properties: {
+            "street": StringSchema(description: "Street address"),
+            "city": StringSchema(description: "City name"),
+            "state": StringSchema(description: "State or province"),
+            "zipCode": StringSchema(description: "Postal/ZIP code"),
+          },
+        ),
+        "tags": ArraySchema(
+          description: "Tags associated with the person",
+          items: StringSchema(),
+          uniqueItems: true,
+        ),
+      },
+    );
 
-      try {
+    // Convert the schema to JSON
+    final schemaJson = personSchema.toJson();
+    print(schemaJson);
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+```
 
-         // Create a StringJsonSchema for email validation
-         var emailSchema = StringJsonSchema()
-            ..title = "Email Schema"
-            ..description = "A schema for validating email addresses"
-            ..format = "email"
-            ..minLength = 5
-            ..maxLength = 100
-            ..pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-         var schema = JsonSchemaDocument(
-            "https://indiealexh.dev/schema/email-list",
-            "Email List Schema",
-            "A Schema to describe a list of emails",
-         );
-         schema
-            ..comment = "This is a comment"
-            ..defaultValue = []
-            ..examples = [
-               ["example@example.com"],
-               ["example@example.com","example2@example.com"]
-            ]
-            ..type = JsonType.array
-            ..contains = emailSchema
-            ..readOnly = true
-            ..writeOnly = false;
-      } catch (e) {
-         print('Error: $e');
-      }
+### Schema Validation
 
-   }
+The library automatically validates JSON Schema properties according to the Draft-07 specification. Validation occurs in the constructor of each JsonSchema class and throws a `JsonSchemaValidationException` if validation fails.
+
+```dart
+void validationExample() {
+  try {
+    // This will throw an exception because minLength is negative
+    final invalidSchema = StringSchema(
+      title: "Invalid Schema",
+      description: "This schema has invalid properties",
+      minLength: -5,  // Invalid: minLength must be non-negative
+    );
+  } catch (e) {
+    print('Validation error: $e');
+    // Output: Validation error: JsonSchemaValidationException: minLength must be a non-negative integer.
+  }
+  
+  try {
+    // This will throw an exception because maxLength < minLength
+    final invalidSchema = StringSchema(
+      title: "Invalid Schema",
+      description: "This schema has invalid properties",
+      minLength: 10,
+      maxLength: 5,  // Invalid: maxLength must be >= minLength
+    );
+  } catch (e) {
+    print('Validation error: $e');
+    // Output: Validation error: JsonSchemaValidationException: maxLength must be greater than or equal to minLength.
+  }
+  
+  try {
+    // This will throw an exception because the pattern is invalid
+    final invalidSchema = StringSchema(
+      title: "Invalid Schema",
+      description: "This schema has invalid properties",
+      pattern: "[",  // Invalid: not a valid regular expression
+    );
+  } catch (e) {
+    print('Validation error: $e');
+    // Output: Validation error: JsonSchemaValidationException: Invalid regular expression in pattern: [
+  }
+  
+  // This is valid and will not throw an exception
+  final validSchema = StringSchema(
+    title: "Valid Schema",
+    description: "This schema has valid properties",
+    minLength: 5,
+    maxLength: 100,
+    pattern: r"^[a-zA-Z0-9]+$",
+  );
+  
+  // Nested schemas are also validated
+  final objectSchema = ObjectSchema(
+    title: "Object Schema",
+    description: "A schema with nested schemas",
+    properties: {
+      "name": StringSchema(
+        type: [JsonType.string],
+        minLength: 1,
+      ),
+      "age": NumberSchema(
+        type: [JsonType.integer],
+        minimum: 0,
+      ),
+    },
+    required: ["name", "age"],
+  );
 }
 ```

@@ -13,7 +13,8 @@ environment:
   sdk: ^3.8.1
 
 # Add regular dependencies here.
-dependencies: {}
+dependencies:
+  json_schema: ^5.2.1
 # path: ^1.8.0
 
 dev_dependencies:
