@@ -40,7 +40,6 @@ void main() {
         expect(schema.format, equals(format));
 
         final json = schema.toJson();
-        print(json);
       }
     });
 
