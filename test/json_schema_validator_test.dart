@@ -345,5 +345,53 @@ void main() {
 
       expect(schema, isA<ObjectSchema>());
     });
+
+    test('validates schema with valid defaultValue', () {
+      // This should not throw an exception
+      final schema = NumberSchema(
+        type: [JsonType.integer],
+        minimum: 0,
+        maximum: 100,
+        defaultValue: 50,
+      );
+
+      expect(schema, isA<NumberSchema>());
+    });
+
+    test('throws exception for schema with invalid defaultValue', () {
+      expect(
+        () => NumberSchema(
+          type: [JsonType.integer],
+          minimum: 0,
+          maximum: 100,
+          defaultValue: 'not a number', // Invalid default value
+        ),
+        throwsA(isA<JsonSchemaValidationException>()),
+      );
+    });
+
+    test('validates schema with valid examples', () {
+      // This should not throw an exception
+      final schema = NumberSchema(
+        type: [JsonType.integer],
+        minimum: 0,
+        maximum: 100,
+        examples: [0, 50, 100],
+      );
+
+      expect(schema, isA<NumberSchema>());
+    });
+
+    test('throws exception for schema with invalid examples', () {
+      expect(
+        () => NumberSchema(
+          type: [JsonType.integer],
+          minimum: 0,
+          maximum: 100,
+          examples: [0, 50, 'not a number', 100], // Invalid example
+        ),
+        throwsA(isA<JsonSchemaValidationException>()),
+      );
+    });
   });
 }

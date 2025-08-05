@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'json_schema.dart';
 import 'json_type_enum.dart';
+import 'package:json_schema/json_schema.dart' as json_validator show JsonSchema;
 
 /// A class for validating JsonSchema objects according to the JSON Schema draft-07 specification.
 ///
@@ -35,7 +36,58 @@ class JsonSchemaValidator {
     // Validate nested schemas
     _validateNestedSchemas(schema, errors);
 
+    // Validate defaultValue against the schema
+    _validateDefaultValue(schema, errors);
+
+    // Validate examples against the schema
+    _validateExamples(schema, errors);
+
     return errors;
+  }
+
+  /// Validates the defaultValue against the schema.
+  static void _validateDefaultValue(JsonSchema schema, List<String> errors) {
+    if (schema.defaultValue != null) {
+      try {
+        // Convert our schema to a format that the external json_schema package can use
+        final schemaMap = schema.toJson();
+        final externalSchema = json_validator.JsonSchema.create(schemaMap);
+
+        // Validate defaultValue against the schema
+        final validationResult = externalSchema.validate(schema.defaultValue);
+        if (!validationResult.isValid) {
+          errors.add(
+            'Default value does not validate against the schema: ${validationResult.errors.join(', ')}',
+          );
+        }
+      } catch (e) {
+        errors.add('Error validating default value: $e');
+      }
+    }
+  }
+
+  /// Validates the examples against the schema.
+  static void _validateExamples(JsonSchema schema, List<String> errors) {
+    if (schema.examples != null && schema.examples!.isNotEmpty) {
+      try {
+        // Convert our schema to a format that the external json_schema package can use
+        final schemaMap = schema.toJson();
+        final externalSchema = json_validator.JsonSchema.create(schemaMap);
+
+        // Validate each example against the schema
+        for (int i = 0; i < schema.examples!.length; i++) {
+          final example = schema.examples![i];
+          final validationResult = externalSchema.validate(example);
+          if (!validationResult.isValid) {
+            errors.add(
+              'Example at index $i does not validate against the schema: ${validationResult.errors.join(', ')}',
+            );
+          }
+        }
+      } catch (e) {
+        errors.add('Error validating examples: $e');
+      }
+    }
   }
 
   /// Validates properties common to all schema types.
