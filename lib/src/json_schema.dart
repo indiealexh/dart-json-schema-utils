@@ -1,6 +1,6 @@
+import 'json_schema_validator.dart';
 import 'json_type_enum.dart';
 import 'string_format_enum.dart';
-import 'json_schema_validator.dart';
 
 /// A base class representing a JSON Schema.
 ///
@@ -12,17 +12,17 @@ class JsonSchema {
   /// From `$id`: A URI for the schema, used for identification and resolution.
   final Uri? id;
 
-  /// From `$ref`: A URI reference to another schema.
-  final Uri? ref;
-
-  /// From `$comment`: A comment for schema authors. Ignored by validators.
-  final String? comment;
-
   /// From `title`: A short, descriptive title for the schema.
   final String? title;
 
   /// From `description`: A more detailed explanation of the schema's purpose.
   final String? description;
+
+  /// From `$ref`: A URI reference to another schema.
+  final Uri? ref;
+
+  /// From `$comment`: A comment for schema authors. Ignored by validators.
+  final String? comment;
 
   /// From `type`: The required primitive type(s) for the instance.
   final List<JsonType>? type;
