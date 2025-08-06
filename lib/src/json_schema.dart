@@ -166,29 +166,54 @@ class JsonSchema {
       examples = json['examples'],
       definitions = json.containsKey('definitions')
           ? (json['definitions'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, JsonSchema.fromJson(value)),
+              (key, value) => MapEntry(
+                key,
+                value is bool
+                    ? BooleanSchema(value)
+                    : JsonSchema.fromJson(value),
+              ),
             )
           : null,
       ifSchema = json.containsKey('if')
-          ? JsonSchema.fromJson(json['if'])
+          ? (json['if'] is bool
+                ? BooleanSchema(json['if'] as bool)
+                : JsonSchema.fromJson(json['if']))
           : null,
       thenSchema = json.containsKey('then')
-          ? JsonSchema.fromJson(json['then'])
+          ? (json['then'] is bool
+                ? BooleanSchema(json['then'] as bool)
+                : JsonSchema.fromJson(json['then']))
           : null,
       elseSchema = json.containsKey('else')
-          ? JsonSchema.fromJson(json['else'])
+          ? (json['else'] is bool
+                ? BooleanSchema(json['else'] as bool)
+                : JsonSchema.fromJson(json['else']))
           : null,
       allOf = json.containsKey('allOf')
-          ? (json['allOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          ? (json['allOf'] as List)
+                .map(
+                  (s) => s is bool ? BooleanSchema(s) : JsonSchema.fromJson(s),
+                )
+                .toList()
           : null,
       anyOf = json.containsKey('anyOf')
-          ? (json['anyOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          ? (json['anyOf'] as List)
+                .map(
+                  (s) => s is bool ? BooleanSchema(s) : JsonSchema.fromJson(s),
+                )
+                .toList()
           : null,
       oneOf = json.containsKey('oneOf')
-          ? (json['oneOf'] as List).map((s) => JsonSchema.fromJson(s)).toList()
+          ? (json['oneOf'] as List)
+                .map(
+                  (s) => s is bool ? BooleanSchema(s) : JsonSchema.fromJson(s),
+                )
+                .toList()
           : null,
       notSchema = json.containsKey('not')
-          ? JsonSchema.fromJson(json['not'])
+          ? (json['not'] is bool
+                ? BooleanSchema(json['not'] as bool)
+                : JsonSchema.fromJson(json['not']))
           : null,
       readOnly = json['readOnly'],
       writeOnly = json['writeOnly'];
@@ -223,20 +248,63 @@ class JsonSchema {
     if (examples != null) json['examples'] = examples;
     if (definitions != null) {
       json['definitions'] = definitions!.map(
-        (key, value) => MapEntry(key, value.toJson()),
+        (key, value) => MapEntry(
+          key,
+          value is BooleanSchema
+              ? (value).value
+              : value.toJson(),
+        ),
       );
     }
-    if (ifSchema != null) json['if'] = ifSchema!.toJson();
-    if (thenSchema != null) json['then'] = thenSchema!.toJson();
-    if (elseSchema != null) json['else'] = elseSchema!.toJson();
-    if (allOf != null) json['allOf'] = allOf!.map((s) => s.toJson()).toList();
-    if (anyOf != null) json['anyOf'] = anyOf!.map((s) => s.toJson()).toList();
-    if (oneOf != null) json['oneOf'] = oneOf!.map((s) => s.toJson()).toList();
-    if (notSchema != null) json['not'] = notSchema!.toJson();
+    if (ifSchema != null) {
+      json['if'] = ifSchema is BooleanSchema
+          ? (ifSchema as BooleanSchema).value
+          : ifSchema!.toJson();
+    }
+    if (thenSchema != null) {
+      json['then'] = thenSchema is BooleanSchema
+          ? (thenSchema as BooleanSchema).value
+          : thenSchema!.toJson();
+    }
+    if (elseSchema != null) {
+      json['else'] = elseSchema is BooleanSchema
+          ? (elseSchema as BooleanSchema).value
+          : elseSchema!.toJson();
+    }
+    if (allOf != null) {
+      json['allOf'] = allOf!
+          .map((s) => s is BooleanSchema ? (s).value : s.toJson())
+          .toList();
+    }
+    if (anyOf != null) {
+      json['anyOf'] = anyOf!
+          .map(
+            (s) => s is BooleanSchema ? (s).value : s.toJson(),
+          )
+          .toList();
+    }
+    if (oneOf != null) {
+      json['oneOf'] = oneOf!
+          .map(
+            (s) => s is BooleanSchema ? (s).value : s.toJson(),
+          )
+          .toList();
+    }
+    if (notSchema != null) {
+      json['not'] = notSchema is BooleanSchema
+          ? (notSchema as BooleanSchema).value
+          : notSchema!.toJson();
+    }
     if (readOnly != null) json['readOnly'] = readOnly;
     if (writeOnly != null) json['writeOnly'] = writeOnly;
     return json;
   }
+}
+
+/// A lightweight schema representing a boolean JSON Schema form (true/false).
+class BooleanSchema extends JsonSchema {
+  final bool value;
+  BooleanSchema(this.value);
 }
 
 /// Represents a JSON Schema for an `object` type.
@@ -257,13 +325,16 @@ class ObjectSchema extends JsonSchema {
   final Map<String, JsonSchema>? patternProperties;
 
   /// From `additionalProperties`: Schema for properties not covered by `properties` or `patternProperties`.
-  final JsonSchema? additionalProperties;
+  /// Can be a JsonSchema or a boolean (true/false) per JSON Schema spec.
+  final dynamic additionalProperties; // bool | JsonSchema
 
   /// From `dependencies`: Property-based dependencies.
-  final Map<String, dynamic>? dependencies;
+  final Map<String, dynamic>?
+  dependencies; // Map<String, List<String> | bool | JsonSchema>
 
   /// From `propertyNames`: A schema that all property names must validate against.
-  final JsonSchema? propertyNames;
+  /// Can be a JsonSchema or a boolean.
+  final dynamic propertyNames; // bool | JsonSchema
 
   ObjectSchema({
     super.schemaVersion,
@@ -321,18 +392,25 @@ class ObjectSchema extends JsonSchema {
             )
           : null,
       additionalProperties = json.containsKey('additionalProperties')
-          ? JsonSchema.fromJson(json['additionalProperties'])
+          ? (json['additionalProperties'] is bool
+                ? json['additionalProperties']
+                : JsonSchema.fromJson(json['additionalProperties']))
           : null,
       dependencies = json.containsKey('dependencies')
           ? (json['dependencies'] as Map<String, dynamic>).map((key, value) {
               if (value is Map<String, dynamic>) {
                 return MapEntry(key, JsonSchema.fromJson(value));
               }
+              if (value is bool) {
+                return MapEntry(key, value);
+              }
               return MapEntry(key, List<String>.from(value));
             })
           : null,
       propertyNames = json.containsKey('propertyNames')
-          ? JsonSchema.fromJson(json['propertyNames'])
+          ? (json['propertyNames'] is bool
+                ? json['propertyNames']
+                : JsonSchema.fromJson(json['propertyNames']))
           : null,
       super._fromJson();
 
@@ -353,7 +431,9 @@ class ObjectSchema extends JsonSchema {
       );
     }
     if (additionalProperties != null) {
-      json['additionalProperties'] = additionalProperties!.toJson();
+      json['additionalProperties'] = additionalProperties is bool
+          ? additionalProperties
+          : (additionalProperties as JsonSchema).toJson();
     }
     if (dependencies != null) {
       json['dependencies'] = dependencies!.map((key, value) {
@@ -363,7 +443,11 @@ class ObjectSchema extends JsonSchema {
         return MapEntry(key, value);
       });
     }
-    if (propertyNames != null) json['propertyNames'] = propertyNames!.toJson();
+    if (propertyNames != null) {
+      json['propertyNames'] = propertyNames is bool
+          ? propertyNames
+          : (propertyNames as JsonSchema).toJson();
+    }
     return json;
   }
 }
@@ -374,7 +458,8 @@ class ArraySchema extends JsonSchema {
   final dynamic items; // JsonSchema or List<JsonSchema>
 
   /// From `additionalItems`: Schema for extra items when `items` is a list.
-  final JsonSchema? additionalItems;
+  /// Can be a JsonSchema or a boolean.
+  final dynamic additionalItems; // bool | JsonSchema
 
   /// From `maxItems`: The maximum number of items in the array.
   final int? maxItems;
@@ -386,7 +471,8 @@ class ArraySchema extends JsonSchema {
   final bool? uniqueItems;
 
   /// From `contains`: At least one item in the array must be valid against this schema.
-  final JsonSchema? contains;
+  /// Can be a JsonSchema or a boolean.
+  final dynamic contains; // bool | JsonSchema
 
   ArraySchema({
     super.schemaVersion,
@@ -434,13 +520,17 @@ class ArraySchema extends JsonSchema {
                 : JsonSchema.fromJson(json['items']))
           : null,
       additionalItems = json.containsKey('additionalItems')
-          ? JsonSchema.fromJson(json['additionalItems'])
+          ? (json['additionalItems'] is bool
+                ? json['additionalItems']
+                : JsonSchema.fromJson(json['additionalItems']))
           : null,
       maxItems = json['maxItems'],
       minItems = json['minItems'],
       uniqueItems = json['uniqueItems'],
       contains = json.containsKey('contains')
-          ? JsonSchema.fromJson(json['contains'])
+          ? (json['contains'] is bool
+                ? json['contains']
+                : JsonSchema.fromJson(json['contains']))
           : null,
       super._fromJson();
 
@@ -457,12 +547,18 @@ class ArraySchema extends JsonSchema {
       }
     }
     if (additionalItems != null) {
-      json['additionalItems'] = additionalItems!.toJson();
+      json['additionalItems'] = additionalItems is bool
+          ? additionalItems
+          : (additionalItems as JsonSchema).toJson();
     }
     if (maxItems != null) json['maxItems'] = maxItems;
     if (minItems != null) json['minItems'] = minItems;
     if (uniqueItems != null) json['uniqueItems'] = uniqueItems;
-    if (contains != null) json['contains'] = contains!.toJson();
+    if (contains != null) {
+      json['contains'] = contains is bool
+          ? contains
+          : (contains as JsonSchema).toJson();
+    }
     return json;
   }
 }

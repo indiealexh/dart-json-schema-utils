@@ -17,6 +17,11 @@ class JsonSchemaValidator {
   /// @param schema The JsonSchema object to validate.
   /// @return A list of validation errors, or an empty list if the schema is valid.
   static List<String> validate(JsonSchema schema) {
+    // Boolean schemas (true/false) are always valid and have no keywords to validate
+    if (schema is BooleanSchema) {
+      return <String>[];
+    }
+
     final errors = <String>[];
 
     // Validate common properties
@@ -472,8 +477,10 @@ class JsonSchemaValidator {
       }
 
       // Validate additionalProperties
-      if (schema.additionalProperties != null) {
-        final nestedErrors = validate(schema.additionalProperties!);
+      if (schema.additionalProperties is JsonSchema) {
+        final nestedErrors = validate(
+          schema.additionalProperties as JsonSchema,
+        );
         for (final error in nestedErrors) {
           errors.add('In additionalProperties: $error');
         }
